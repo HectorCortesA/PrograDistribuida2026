@@ -1,8 +1,6 @@
 package com.practica1;
 
 import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 public class FuncionTransferencia {
 
