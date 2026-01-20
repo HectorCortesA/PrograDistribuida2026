@@ -59,8 +59,8 @@ public class ClienteUDPConfiable {
             System.out.println("  ACK enviado: " + ackConexion);
             System.out.println("✓ Conexión establecida con el servidor");
 
-            // ===== TRANSFERENCIA DEL ARCHIVO =====
-            System.out.println("\n[2] Transfiriendo archivo línea por línea...");
+            // ===== TRANSFERENCIA DEL ARCHIVO (CLIENTE -> SERVIDOR) =====
+            System.out.println("\n[2] Transfiriendo archivo al servidor (línea por línea)...");
 
             BufferedReader lector = Files.newBufferedReader(rutaArchivo);
             String linea;
@@ -104,15 +104,67 @@ public class ClienteUDPConfiable {
             }
 
             lector.close();
-            System.out.println("✓ " + lineasEnviadas + " líneas enviadas correctamente");
+            System.out.println("✓ " + lineasEnviadas + " líneas enviadas correctamente al servidor");
 
-            // ===== FINALIZACIÓN DE TRANSFERENCIA =====
-            System.out.println("\n[3] Finalizando transferencia...");
+            // ===== FINALIZACIÓN DE TRANSFERENCIA CLIENTE -> SERVIDOR =====
+            System.out.println("\n[2b] Finalizando envío al servidor...");
 
             // Enviar paquete FIN de datos (tamaño 0)
             String finData = "DATA:" + numeroSecuencia + ":0:FIN";
-            enviarPaquete(socket, ipServidor, puertoServidor, finData);
-            recibirPaqueteConTimeout(socket, 2000); // Esperar ACK
+            boolean finAckRecibido = false;
+            for (int intento = 1; intento <= 3 && !finAckRecibido; intento++) {
+                try {
+                    enviarPaquete(socket, ipServidor, puertoServidor, finData);
+                    finAckRecibido = true;
+                } catch (SocketTimeoutException e) {
+                    System.out.println("    Reintentando envío de paquete final...");
+                }
+            }
+
+            numeroSecuencia++;
+
+            // ===== RECIBIENDO ARCHIVO DEL SERVIDOR =====
+            System.out.println("\n[3] Recibiendo archivo del servidor...");
+
+            FileWriter escritor = new FileWriter(nombreArchivo);
+            int lineasRecibidas = 0;
+            boolean recepcionTerminada = false;
+
+            while (!recepcionTerminada) {
+                try {
+                    DatagramPacket dataRx = recibirPaqueteConTimeout(socket, 2000);
+                    String dataMsg = new String(dataRx.getData(), 0, dataRx.getLength());
+
+                    if (dataMsg.startsWith("DATA:")) {
+                        String[] partes = dataMsg.split(":", 4);
+                        if (partes.length >= 4) {
+                            long seqRx = Long.parseLong(partes[1]);
+                            int tamanio = Integer.parseInt(partes[2]);
+                            String lineaRx = partes[3];
+
+                            // Enviar ACK
+                            String ack = "ACK:" + seqRx;
+                            enviarPaquete(socket, ipServidor, puertoServidor, ack);
+
+                            if (tamanio > 0) {
+                                escritor.write(lineaRx + "\n");
+                                lineasRecibidas++;
+                                System.out.println("  Línea " + lineasRecibidas + " recibida de servidor");
+                            } else {
+                                // FIN de transferencia desde servidor
+                                System.out.println("  Transferencia desde servidor completada");
+                                recepcionTerminada = true;
+                            }
+                        }
+                    }
+                } catch (SocketTimeoutException e) {
+                    System.out.println("ERROR: Timeout esperando datos del servidor");
+                    break;
+                }
+            }
+
+            escritor.close();
+            System.out.println("✓ " + lineasRecibidas + " líneas recibidas y guardadas en copia local");
 
             // ===== FOUR-WAY HANDSHAKE =====
             System.out.println("\n[4] Cerrando conexión (Four-Way Handshake)...");
@@ -124,14 +176,14 @@ public class ClienteUDPConfiable {
 
             // Paso 2: Recibir ACK del servidor
             DatagramPacket ackFinPacket = recibirPaqueteConTimeout(socket, 2000);
-            String ackFin = new String(ackFinPacket.getData(), 0, ackFinPacket.getLength());
+            String ackFinMsg = new String(ackFinPacket.getData(), 0, ackFinPacket.getLength());
 
-            if (!ackFin.startsWith("ACK:")) {
+            if (!ackFinMsg.startsWith("ACK:")) {
                 System.err.println("ERROR: No se recibió ACK para FIN");
                 socket.close();
                 return;
             }
-            System.out.println("  ACK recibido: " + ackFin);
+            System.out.println("  ACK recibido: " + ackFinMsg);
 
             // Paso 3: Recibir FIN del servidor
             DatagramPacket finServidorPacket = recibirPaqueteConTimeout(socket, 2000);
@@ -155,9 +207,11 @@ public class ClienteUDPConfiable {
             socket.close();
 
             System.out.println("\n✅ Transferencia completada exitosamente!");
-            System.out.println("   Archivo: " + nombreArchivo);
-            System.out.println("   Líneas enviadas: " + lineasEnviadas);
-            System.out.println("   Destino: " + ipDestino + ":5000");
+            System.out.println("   Archivo original enviado: " + nombreArchivo);
+            System.out.println("   Líneas enviadas al servidor: " + lineasEnviadas);
+            System.out.println("   Copia recibida y guardada: " + nombreArchivo);
+            System.out.println("   Líneas recibidas de servidor: " + lineasRecibidas);
+            System.out.println("   Servidor: " + ipDestino + ":5000");
 
         } catch (UnknownHostException e) {
             System.err.println("ERROR: Dirección IP no válida - " + e.getMessage());

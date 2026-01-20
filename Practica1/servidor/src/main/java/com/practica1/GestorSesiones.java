@@ -9,7 +9,7 @@ public class GestorSesiones {
     // Métodos estáticos para gestión de sesiones
     public static void agregarSesion(String clave, Sesion sesion) {
         sesiones.put(clave, sesion);
-        System.out.println("Sesión creada: " + clave);
+        System.out.println("[SESIÓN] Creada: " + clave);
     }
 
     public static Sesion obtenerSesion(String clave) {
@@ -18,7 +18,7 @@ public class GestorSesiones {
 
     public static void eliminarSesion(String clave) {
         sesiones.remove(clave);
-        System.out.println("Sesión eliminada: " + clave);
+        System.out.println("[SESIÓN] Eliminada: " + clave);
     }
 
     public static boolean existeSesion(String clave) {

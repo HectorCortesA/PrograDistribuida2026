@@ -8,9 +8,11 @@ public class ServidorUDPConfiable {
 
     public static void main(String[] args) {
         System.out.println("=== Servidor UDP Confiable ===");
+        System.out.println("Puerto: " + PUERTO);
+        System.out.println("Esperando conexiones de clientes...\n");
 
         try (DatagramSocket socket = new DatagramSocket(PUERTO)) {
-            System.out.println("Escuchando en puerto: " + PUERTO);
+            System.out.println("✓ Escuchando en puerto: " + PUERTO);
 
             while (true) {
                 try {
@@ -22,11 +24,11 @@ public class ServidorUDPConfiable {
                     new Thread(new ManejadorCliente(paquete, socket)).start();
 
                 } catch (IOException e) {
-                    System.err.println("Error: " + e.getMessage());
+                    System.err.println("[ERROR] Recibiendo paquete: " + e.getMessage());
                 }
             }
         } catch (SocketException e) {
-            System.err.println("Error socket: " + e.getMessage());
+            System.err.println("[ERROR] Socket: " + e.getMessage());
         }
     }
 }

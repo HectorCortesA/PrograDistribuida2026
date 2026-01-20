@@ -95,21 +95,84 @@ public class ManejadorCliente implements Runnable {
             String ack = Configuracion.TIPO_ACK + ":" + seq;
             enviar(ip, puerto, ack);
 
-            // Si es el último paquete
+            // Si es el último paquete (fin del envío del cliente)
             if (tamano == 0) {
+                System.out.println("Último paquete recibido. Guardando archivo...");
                 ManejadorArchivos.guardarArchivo(sesion);
 
-                // Iniciar FOUR-WAY HANDSHAKE (servidor inicia cierre)
-                String fin = Configuracion.TIPO_FIN + ":" + (seq + 1);
-                enviar(ip, puerto, fin);
-                sesion.setEstado(Configuracion.ESTADO_FIN_ENVIADO);
+                // Reenviar archivo al cliente
+                System.out.println("Reenviando archivo al cliente...");
+                reenviaarchivoAlCliente(ip, puerto, sesion);
+
+                // Actualizar secuencia para el cierre
+                sesion.incrementarSecuencia();
             }
         } else {
-            // Reenviar ACK anterior
+            // Reenviar ACK anterior en caso de duplicado
             long ultimoAck = sesion.getSecuenciaEsperada() - 1;
             String ack = Configuracion.TIPO_ACK + ":" + ultimoAck;
             enviar(ip, puerto, ack);
         }
+    }
+
+    // Reenviar archivo al cliente
+    private void reenviaarchivoAlCliente(InetAddress ip, int puerto, Sesion sesion) throws IOException {
+        String contenido = sesion.getDatos();
+        String[] lineas = contenido.split("\n");
+
+        long seqReenvio = sesion.getSecuenciaEsperada() + 1000; // Usar secuencia diferente
+
+        System.out.println("Iniciando reenvío de " + lineas.length + " líneas al cliente");
+
+        for (int i = 0; i < lineas.length; i++) {
+            String linea = lineas[i];
+
+            if (linea.isEmpty()) {
+                continue; // Saltar líneas vacías
+            }
+
+            // Crear paquete DATA para reenvío
+            String dataPacket = "DATA:" + seqReenvio + ":" + linea.length() + ":" + linea;
+
+            // Enviar con reintentos
+            boolean ackRecibido = false;
+            for (int intento = 1; intento <= 3 && !ackRecibido; intento++) {
+                try {
+                    enviar(ip, puerto, dataPacket);
+
+                    // Esperar ACK del cliente
+                    byte[] buffer = new byte[Configuracion.TAMANO_BUFFER];
+                    DatagramPacket ackPacket = new DatagramPacket(buffer, buffer.length);
+                    socket.setSoTimeout(2000);
+
+                    try {
+                        socket.receive(ackPacket);
+                        String ackMsg = new String(ackPacket.getData(), 0, ackPacket.getLength());
+
+                        if (ackMsg.equals("ACK:" + seqReenvio)) {
+                            ackRecibido = true;
+                            System.out.println("  Línea " + (i + 1) + " reenviada correctamente");
+                        }
+                    } catch (SocketTimeoutException e) {
+                        if (intento < 3) {
+                            System.out.println("  Timeout, reintentando línea " + (i + 1));
+                        }
+                    } finally {
+                        socket.setSoTimeout(0);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Error reenviando línea " + (i + 1) + ": " + e.getMessage());
+                }
+            }
+
+            seqReenvio++;
+        }
+
+        // Enviar paquete final (tamaño 0) para indicar fin del reenvío
+        String finReenvio = "DATA:" + seqReenvio + ":0:FIN";
+        enviar(ip, puerto, finReenvio);
+        System.out.println("Reenvío completado. Paquete final enviado.");
     }
 
     // FOUR-WAY HANDSHAKE
@@ -137,7 +200,7 @@ public class ManejadorCliente implements Runnable {
             // Paso 4: ACK del nuestro FIN
             if (mensaje.startsWith(Configuracion.TIPO_ACK + ":")) {
                 GestorSesiones.eliminarSesion(clave);
-                System.out.println("Conexión cerrada con " + clave);
+                System.out.println("✓ Conexión cerrada correctamente con " + clave);
             }
         }
     }
@@ -150,7 +213,7 @@ public class ManejadorCliente implements Runnable {
         // ACK del SYN-ACK (three-way handshake completo)
         if (Configuracion.ESTADO_SYN_RECIBIDO.equals(sesion.getEstado())) {
             sesion.setEstado(Configuracion.ESTADO_ESTABLISHED);
-            System.out.println("Conexión establecida con " + clave);
+            System.out.println("✓ Conexión establecida con " + clave);
         }
         // ACK del nuestro FIN
         else if (Configuracion.ESTADO_FIN_ENVIADO.equals(sesion.getEstado())) {
