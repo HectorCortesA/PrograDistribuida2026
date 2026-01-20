@@ -8,6 +8,6 @@ public class ConfiguracionCliente {
     public static final int TAMANO_BUFFER = 1024;
 
     // Valores por defecto para pruebas
-    public static final String IP_LOCALHOST = "127.0.0.1";
+    public static final String IP_LOCALHOST = "192.168.100.20";
     public static final String ARCHIVO_PRUEBA = "prueba.txt";
 }

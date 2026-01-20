@@ -59,7 +59,7 @@ public class ManejadorCliente implements Runnable {
 
         // Crear sesión
         Sesion sesion = new Sesion(ip, puerto, nombreArchivo);
-        sesion.setSecuenciaEsperada(seq + 1);
+        sesion.setSecuenciaEsperada(seq + 2); // ← CORREGIDO: seq + 2 (siguiente DATA)
         GestorSesiones.agregarSesion(clave, sesion);
 
         // Enviar SYN-ACK

@@ -8,7 +8,7 @@ public class ClienteUDPConfiable {
 
     // FUNCIÓN SOLICITADA POR EL ENUNCIADO
     public static void transferirArchivo(String ipOrigen, String ipDestino, String nombreArchivo) {
-        System.out.println("=== Iniciando transferencia de archivo ===");
+        System.out.println("Iniciando transferencia de archivo");
         System.out.println("IP Origen: " + ipOrigen);
         System.out.println("IP Destino: " + ipDestino);
         System.out.println("Archivo: " + nombreArchivo);
@@ -89,7 +89,7 @@ public class ClienteUDPConfiable {
                             System.out.println("    ACK recibido para seq=" + numeroSecuencia);
                         }
                     } catch (SocketTimeoutException e) {
-                        System.out.println("    Timeout, reintentando...");
+                        System.out.println("cleaTimeout, reintentando...");
                     }
                 }
 
@@ -104,7 +104,7 @@ public class ClienteUDPConfiable {
             }
 
             lector.close();
-            System.out.println("✓ " + lineasEnviadas + " líneas enviadas correctamente al servidor");
+            System.out.println(lineasEnviadas + " líneas enviadas correctamente al servidor");
 
             // ===== FINALIZACIÓN DE TRANSFERENCIA CLIENTE -> SERVIDOR =====
             System.out.println("\n[2b] Finalizando envío al servidor...");
@@ -164,7 +164,7 @@ public class ClienteUDPConfiable {
             }
 
             escritor.close();
-            System.out.println("✓ " + lineasRecibidas + " líneas recibidas y guardadas en copia local");
+            System.out.println(lineasRecibidas + " líneas recibidas y guardadas en copia local");
 
             // ===== FOUR-WAY HANDSHAKE =====
             System.out.println("\n[4] Cerrando conexión (Four-Way Handshake)...");
