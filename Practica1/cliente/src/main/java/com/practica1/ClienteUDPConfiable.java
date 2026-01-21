@@ -1,229 +1,163 @@
-package com.hector;
+package com.practica1;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.*;
 import java.util.*;
 
 public class ClienteUDPConfiable {
 
-    // Método para SOLICITAR un archivo del servidor
     public static void solicitarArchivo(String ipOrigen, String ipDestino, String nombreArchivo) {
         System.out.println("=== CLIENTE UDP CONFIABLE ===");
-        System.out.println("IP Origen: " + ipOrigen);
-        System.out.println("IP Destino: " + ipDestino);
-        System.out.println("Archivo SOLICITADO: " + nombreArchivo);
+        System.out.println("Solicitando archivo: " + nombreArchivo);
+        System.out.println("Servidor: " + ipDestino + ":22000");
         System.out.println("=============================\n");
 
         DatagramSocket socket = null;
         try {
-            // ===== CONFIGURAR CONEXIÓN UDP =====
+            // Configurar socket
+            socket = new DatagramSocket();
+            socket.setSoTimeout(10000); // Timeout general de 10 segundos
+
             InetAddress ipServidor = InetAddress.getByName(ipDestino);
             final int PUERTO_SERVIDOR = 22000;
 
-            // Crear socket UDP
-            socket = new DatagramSocket();
-            socket.setSoTimeout(10000); // Timeout de 10 segundos
-
-            System.out.println("Cliente UDP iniciado en:");
-            System.out.println("  Puerto local: " + socket.getLocalPort());
-            System.out.println("  Conectando a: " + ipDestino + ":" + PUERTO_SERVIDOR);
+            System.out.println("Cliente en puerto: " + socket.getLocalPort());
             System.out.println();
 
             // ===== 1. THREE-WAY HANDSHAKE =====
-            System.out.println("[1] THREE-WAY HANDSHAKE (Cliente → Servidor)...");
+            System.out.println("[1] THREE-WAY HANDSHAKE");
 
-            // Paso 1: Cliente envía SYN con solicitud de archivo
+            // SYN
             long seqInicial = System.currentTimeMillis() % 10000;
-            String synMsg = "SYN:" + nombreArchivo + ":" + seqInicial;
-            enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, synMsg);
-            System.out.println("  CLIENTE → SERVIDOR: SYN, seq=" + seqInicial);
-            System.out.println("    Solicitud archivo: " + nombreArchivo);
+            String syn = "SYN:" + nombreArchivo + ":" + seqInicial;
+            enviar(socket, ipServidor, PUERTO_SERVIDOR, syn);
+            System.out.println("  → SYN (seq=" + seqInicial + ")");
 
-            // Paso 2: Esperar SYN-ACK del servidor
-            System.out.println("  Esperando SYN-ACK del servidor...");
-            String synAck = recibirPaqueteConTimeout(socket, 5000);
+            // SYN-ACK
+            System.out.println("  Esperando SYN-ACK...");
+            String synAck = recibirConTimeout(socket, 5000);
 
             if (synAck == null) {
-                System.err.println("ERROR: Timeout - Servidor no responde");
-                socket.close();
+                System.err.println("✗ Timeout: Servidor no responde");
                 return;
             }
 
             if (!synAck.startsWith("SYN-ACK:")) {
                 if (synAck.startsWith("ERROR:")) {
-                    String errorMsg = synAck.substring(6);
-                    System.err.println("ERROR del servidor: " + errorMsg);
-
-                    // Si el archivo no existe, mostrar ayuda
-                    if (errorMsg.contains("no existe") || errorMsg.contains("no encontrado")) {
-                        System.out.println("\n¿Quieres ver los archivos disponibles en el servidor? (s/n): ");
-                        Scanner scanner = new Scanner(System.in);
-                        if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
-                            solicitarListaArchivos(socket, ipServidor, PUERTO_SERVIDOR);
-                        }
-                        scanner.close();
-                    }
+                    System.err.println("✗ Error servidor: " + synAck.substring(6));
                 } else {
-                    System.err.println("ERROR: Se esperaba SYN-ACK pero se recibió: " + synAck);
+                    System.err.println("✗ Respuesta inesperada: " + synAck);
                 }
-                socket.close();
                 return;
             }
 
-            // Extraer información del SYN-ACK
-            String[] partesSynAck = synAck.split(":");
-            String nombreArchivoConfirmado = partesSynAck[1];
-            long seqSynAck = Long.parseLong(partesSynAck[2]);
+            String[] partes = synAck.split(":");
+            long seqSynAck = Long.parseLong(partes[2]);
+            System.out.println("  ← SYN-ACK (seq=" + seqSynAck + ")");
 
-            System.out.println("  SERVIDOR → CLIENTE: SYN-ACK, seq=" + seqSynAck);
-            System.out.println("    Archivo confirmado: " + nombreArchivoConfirmado);
+            // ACK
+            String ack = "ACK:" + seqSynAck;
+            enviar(socket, ipServidor, PUERTO_SERVIDOR, ack);
+            System.out.println("  → ACK (ack=" + seqSynAck + ")");
+            System.out.println("✓ Conexión establecida\n");
 
-            // Verificar que seqSynAck = seqInicial + 1
-            if (seqSynAck != seqInicial + 1) {
-                System.err.println("ERROR: Número de secuencia incorrecto en SYN-ACK");
-                socket.close();
-                return;
-            }
+            // ===== 2. RECIBIR ARCHIVO =====
+            System.out.println("[2] RECIBIENDO ARCHIVO");
 
-            // Paso 3: Cliente envía ACK para completar handshake
-            String ackMsg = "ACK:" + seqSynAck;
-            enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, ackMsg);
-            System.out.println("  CLIENTE → SERVIDOR: ACK, ack=" + seqSynAck);
-            System.out.println("✓ CONEXIÓN ESTABLECIDA - Three-way handshake completado");
-
-            // ===== 2. ESPERAR RECEPCIÓN DEL ARCHIVO =====
-            System.out.println("\n[2] ESPERANDO ARCHIVO DEL SERVIDOR...");
-
-            // Crear archivo local para guardar lo recibido
-            String nombreLocal = nombreArchivo;
-            if (nombreArchivo.contains(".")) {
-                nombreLocal = nombreArchivo.replaceFirst("\\.([^\\.]+)$", "_recibido.$1");
-            } else {
-                nombreLocal = nombreArchivo + "_recibido";
-            }
-
+            // Crear archivo local
+            String nombreLocal = nombreArchivo.replace(".txt", "_recibido.txt");
             FileWriter escritor = new FileWriter(nombreLocal);
             int lineasRecibidas = 0;
             long secuenciaEsperada = seqSynAck + 1;
-            boolean finTransferencia = false;
+            boolean transferenciaCompleta = false;
 
-            System.out.println("  Archivo local: " + nombreLocal);
-            System.out.println("  Esperando datos del servidor...");
+            System.out.println("  Guardando en: " + nombreLocal);
+            System.out.println("  Esperando datos...\n");
 
-            while (!finTransferencia) {
-                socket.setSoTimeout(15000); // Timeout de 15 segundos para transferencia
+            // Aumentar timeout para recepción
+            socket.setSoTimeout(15000);
 
+            while (!transferenciaCompleta) {
                 try {
-                    String paqueteRecibido = recibirPaquete(socket);
+                    String paquete = recibir(socket);
 
-                    if (paqueteRecibido.startsWith("DATA:")) {
-                        // Procesar paquete DATA
-                        String[] partes = paqueteRecibido.split(":", 4);
-                        long seqRecibido = Long.parseLong(partes[1]);
-                        int tamaño = Integer.parseInt(partes[2]);
-                        String contenido = partes[3];
+                    if (paquete.startsWith("DATA:")) {
+                        String[] datos = paquete.split(":", 4);
+                        long seq = Long.parseLong(datos[1]);
+                        int tamaño = Integer.parseInt(datos[2]);
+                        String contenido = datos[3];
 
-                        System.out.println("  SERVIDOR → CLIENTE: DATA, seq=" + seqRecibido);
+                        System.out.println("  ← DATA (seq=" + seq + ", tamaño=" + tamaño + ")");
 
-                        // Verificar secuencia
-                        if (seqRecibido == secuenciaEsperada) {
-                            // Enviar ACK de confirmación
-                            String ackData = "ACK:" + seqRecibido;
-                            enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, ackData);
-                            System.out.println("  CLIENTE → SERVIDOR: ACK, ack=" + seqRecibido);
+                        // Enviar ACK inmediatamente
+                        String ackData = "ACK:" + seq;
+                        enviar(socket, ipServidor, PUERTO_SERVIDOR, ackData);
+                        System.out.println("  → ACK (ack=" + seq + ")");
 
-                            if (tamaño > 0) {
-                                // Guardar línea recibida
-                                escritor.write(contenido + "\n");
-                                lineasRecibidas++;
-                                secuenciaEsperada++;
+                        if (tamaño > 0) {
+                            // Guardar línea
+                            escritor.write(contenido + "\n");
+                            lineasRecibidas++;
 
-                                if (lineasRecibidas % 10 == 0 || lineasRecibidas == 1) {
-                                    System.out.println("    Líneas recibidas: " + lineasRecibidas);
-                                }
-                            } else if (tamaño == 0 && contenido.equals("FIN-DATA")) {
-                                // Fin de la transferencia
-                                System.out.println("  ✓ FIN-DATA recibido - Transferencia completada");
-                                finTransferencia = true;
+                            if (lineasRecibidas % 5 == 0 || lineasRecibidas == 1) {
+                                System.out.println("    Líneas recibidas: " + lineasRecibidas);
                             }
-                        } else {
-                            // Secuencia incorrecta, reenviar ACK anterior
-                            System.out.println("  Secuencia incorrecta, reenviando último ACK...");
-                            String ackAnterior = "ACK:" + (secuenciaEsperada - 1);
-                            enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, ackAnterior);
+                        } else if (tamaño == 0 && contenido.equals("FIN-DATA")) {
+                            System.out.println("  ← FIN-DATA recibido");
+                            transferenciaCompleta = true;
                         }
 
-                    } else if (paqueteRecibido.startsWith("ERROR:")) {
-                        System.err.println("ERROR del servidor: " + paqueteRecibido.substring(6));
-                        break;
-                    } else if (paqueteRecibido.startsWith("FIN:")) {
-                        System.out.println("  FIN inesperado recibido");
+                    } else if (paquete.startsWith("FIN:")) {
+                        System.out.println("  ← FIN recibido");
+                        // Responder con ACK
+                        String[] finPartes = paquete.split(":");
+                        long seqFin = Long.parseLong(finPartes[1]);
+                        String ackFin = "ACK:" + seqFin;
+                        enviar(socket, ipServidor, PUERTO_SERVIDOR, ackFin);
+                        System.out.println("  → ACK para FIN");
                         break;
                     }
 
                 } catch (SocketTimeoutException e) {
-                    System.out.println("  Timeout: No más datos del servidor");
-                    finTransferencia = true;
+                    System.out.println("  ⏱ Timeout: No más datos");
+                    transferenciaCompleta = true;
                 }
             }
 
             escritor.close();
-            socket.setSoTimeout(0);
-            System.out.println("✓ " + lineasRecibidas + " líneas recibidas en: " + nombreLocal);
+            System.out.println("\n✓ Archivo recibido: " + lineasRecibidas + " líneas");
 
-            // ===== 3. FOUR-WAY HANDSHAKE =====
-            System.out.println("\n[3] FOUR-WAY HANDSHAKE - CERRANDO CONEXIÓN...");
+            // ===== 3. CERRAR CONEXIÓN =====
+            System.out.println("\n[3] CERRANDO CONEXIÓN");
 
-            // Paso 1: Cliente envía FIN
-            String finMsg = "FIN:" + secuenciaEsperada;
-            enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, finMsg);
-            System.out.println("  CLIENTE → SERVIDOR: FIN, seq=" + secuenciaEsperada);
+            // Enviar FIN
+            String fin = "FIN:" + secuenciaEsperada;
+            enviar(socket, ipServidor, PUERTO_SERVIDOR, fin);
+            System.out.println("  → FIN enviado");
 
-            // Paso 2: Esperar ACK del servidor (con timeout)
-            socket.setSoTimeout(3000);
+            // Esperar ACK breve tiempo
+            socket.setSoTimeout(2000);
             try {
-                String ackFin = recibirPaquete(socket);
-                if (ackFin.startsWith("ACK:")) {
-                    System.out.println("  SERVIDOR → CLIENTE: ACK para FIN");
+                String respuesta = recibir(socket);
+                if (respuesta.startsWith("ACK:")) {
+                    System.out.println("  ← ACK recibido");
                 }
             } catch (SocketTimeoutException e) {
-                System.out.println("  Timeout esperando ACK para FIN");
+                // Timeout OK, servidor puede haber cerrado
             }
 
-            // Paso 3: Esperar FIN del servidor
-            socket.setSoTimeout(3000);
-            try {
-                String finServidor = recibirPaquete(socket);
-                if (finServidor.startsWith("FIN:")) {
-                    System.out.println("  SERVIDOR → CLIENTE: FIN");
-
-                    // Paso 4: Enviar ACK final
-                    String[] partesFin = finServidor.split(":");
-                    long seqFin = Long.parseLong(partesFin[1]);
-                    String ackFinal = "ACK:" + seqFin;
-                    enviarPaquete(socket, ipServidor, PUERTO_SERVIDOR, ackFinal);
-                    System.out.println("  CLIENTE → SERVIDOR: ACK final");
-                }
-            } catch (SocketTimeoutException e) {
-                System.out.println("  Timeout esperando FIN del servidor");
-            } finally {
-                socket.setSoTimeout(0);
-            }
-
-            // Cerrar socket
             socket.close();
 
             // ===== RESUMEN =====
-            System.out.println("\n✅ TRANSFERENCIA COMPLETADA!");
-            System.out.println("================================");
-            System.out.println("Archivo solicitado: " + nombreArchivo);
-            System.out.println("Copia local: " + nombreLocal);
-            System.out.println("Líneas recibidas: " + lineasRecibidas);
-            System.out.println("Servidor: " + ipDestino + ":22000");
+            System.out.println("\n✅ TRANSFERENCIA COMPLETADA");
+            System.out.println("============================");
+            System.out.println("Archivo: " + nombreArchivo);
+            System.out.println("Guardado como: " + nombreLocal);
+            System.out.println("Líneas: " + lineasRecibidas);
+            System.out.println("Servidor: " + ipDestino);
 
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            System.err.println("\n✗ ERROR: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (socket != null && !socket.isClosed()) {
@@ -232,132 +166,59 @@ public class ClienteUDPConfiable {
         }
     }
 
-    // Método para solicitar lista de archivos
-    private static void solicitarListaArchivos(DatagramSocket socket, InetAddress ipServidor, int puerto)
-            throws IOException {
-        System.out.println("\n=== SOLICITANDO LISTA DE ARCHIVOS ===");
+    // ===== MÉTODOS AUXILIARES =====
 
-        // Enviar solicitud de lista
-        enviarPaquete(socket, ipServidor, puerto, "LISTA");
-        System.out.println("Solicitud enviada...");
-
-        // Recibir respuesta con timeout
-        socket.setSoTimeout(5000);
-        try {
-            String respuesta = recibirPaquete(socket);
-            System.out.println("\n" + respuesta);
-        } catch (SocketTimeoutException e) {
-            System.out.println("No se recibió respuesta del servidor");
-        } finally {
-            socket.setSoTimeout(0);
-        }
-    }
-
-    // ===== MÉTODOS AUXILIARES UDP =====
-
-    private static void enviarPaquete(DatagramSocket socket, InetAddress ip, int puerto, String mensaje)
+    private static void enviar(DatagramSocket socket, InetAddress ip, int puerto, String mensaje)
             throws IOException {
         byte[] buffer = mensaje.getBytes();
         DatagramPacket paquete = new DatagramPacket(buffer, buffer.length, ip, puerto);
         socket.send(paquete);
     }
 
-    private static String recibirPaquete(DatagramSocket socket) throws IOException {
-        byte[] buffer = new byte[65507]; // Tamaño máximo UDP
+    private static String recibir(DatagramSocket socket) throws IOException {
+        byte[] buffer = new byte[65507];
         DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
         socket.receive(paquete);
         return new String(paquete.getData(), 0, paquete.getLength());
     }
 
-    private static String recibirPaqueteConTimeout(DatagramSocket socket, int timeoutMs)
+    private static String recibirConTimeout(DatagramSocket socket, int timeoutMs)
             throws IOException {
         socket.setSoTimeout(timeoutMs);
         try {
-            return recibirPaquete(socket);
+            return recibir(socket);
         } catch (SocketTimeoutException e) {
             return null;
-        } finally {
-            socket.setSoTimeout(0);
         }
     }
 
-    // ===== MÉTODO MAIN =====
+    // ===== MÉTODO MAIN SIMPLIFICADO =====
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("=== CLIENTE UDP CONFIABLE ===");
-        System.out.println("Solicita archivos de un servidor remoto");
-        System.out.println("Protocolo: UDP con confiabilidad TCP-like");
-        System.out.println("========================================\n");
+        System.out.println("Solicita archivos de un servidor");
+        System.out.println("Puerto servidor: 22000\n");
 
-        // Configuración
-        System.out.print("IP del servidor [localhost]: ");
-        String ipDestino = scanner.nextLine().trim();
-        if (ipDestino.isEmpty()) {
-            ipDestino = "localhost";
+        System.out.print("IP del servidor: ");
+        String ipServidor = scanner.nextLine().trim();
+        if (ipServidor.isEmpty()) {
+            ipServidor = "localhost";
         }
 
-        System.out.print("IP origen [0.0.0.0]: ");
-        String ipOrigen = scanner.nextLine().trim();
-        if (ipOrigen.isEmpty()) {
-            ipOrigen = "0.0.0.0";
-        }
+        System.out.print("Archivo a solicitar: ");
+        String nombreArchivo = scanner.nextLine().trim();
 
-        // Menú de opciones
-        while (true) {
-            System.out.println("\n=== MENÚ PRINCIPAL ===");
-            System.out.println("1. Solicitar archivo específico");
-            System.out.println("2. Ver lista de archivos disponibles");
-            System.out.println("3. Salir");
-            System.out.print("\nSeleccione opción (1-3): ");
-
-            String opcion = scanner.nextLine().trim();
-
-            if (opcion.equals("3")) {
-                System.out.println("Saliendo...");
-                break;
-            }
-
-            if (opcion.equals("2")) {
-                // Solicitar lista de archivos
-                try {
-                    DatagramSocket socketTemp = new DatagramSocket();
-                    InetAddress ipServidor = InetAddress.getByName(ipDestino);
-
-                    System.out.println("\nSolicitando lista de archivos...");
-                    solicitarListaArchivos(socketTemp, ipServidor, 22000);
-
-                    socketTemp.close();
-                } catch (Exception e) {
-                    System.err.println("Error: " + e.getMessage());
-                }
-                continue;
-            }
-
-            if (opcion.equals("1")) {
-                // Solicitar archivo específico
-                System.out.print("\nNombre del archivo a solicitar: ");
-                String nombreArchivo = scanner.nextLine().trim();
-
-                if (nombreArchivo.isEmpty()) {
-                    System.out.println("Debe especificar un nombre de archivo");
-                    continue;
-                }
-
-                System.out.println("\nIniciando solicitud de: " + nombreArchivo);
-                System.out.println("Servidor: " + ipDestino);
-                System.out.println("========================================\n");
-
-                solicitarArchivo(ipOrigen, ipDestino, nombreArchivo);
-
-                System.out.print("\nPresione Enter para continuar...");
-                scanner.nextLine();
-            } else {
-                System.out.println("Opción no válida");
-            }
+        if (nombreArchivo.isEmpty()) {
+            System.out.println("Debe especificar un archivo");
+            scanner.close();
+            return;
         }
 
         scanner.close();
+
+        // Solicitar archivo
+        solicitarArchivo("0.0.0.0", ipServidor, nombreArchivo);
     }
 }

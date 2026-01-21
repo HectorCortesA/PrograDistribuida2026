@@ -3,406 +3,286 @@ package com.practica1;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
-import java.util.concurrent.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class ServidorUDPConfiable {
     private static final int PUERTO = 22000;
-    private static final ConcurrentHashMap<String, SesionCliente> sesiones = new ConcurrentHashMap<>();
-    private static final String DIRECTORIO_BASE = "/Users/hectorcortes/Downloads";
+    private static final String DIRECTORIO_ARCHIVOS = "/Users/hectorcortes/Downloads";
+    private static final Map<String, HiloCliente> clientesActivos = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
         System.out.println("=== SERVIDOR UDP CONFIABLE ===");
         System.out.println("Puerto: " + PUERTO);
-        System.out.println("Directorio base: " + DIRECTORIO_BASE);
-        System.out.println("Escuchando en todas las interfaces");
-        System.out.println("==============================\n");
+        System.out.println("Directorio archivos: " + DIRECTORIO_ARCHIVOS);
+        System.out.println("================================\n");
 
-        // Verificar que el directorio existe
-        File directorio = new File(DIRECTORIO_BASE);
-        if (!directorio.exists() || !directorio.isDirectory()) {
-            System.err.println("ERROR: El directorio base no existe o no es válido");
-            System.err.println("Directorio: " + DIRECTORIO_BASE);
-            return;
+        // Verificar directorio
+        File directorio = new File(DIRECTORIO_ARCHIVOS);
+        if (!directorio.exists()) {
+            System.out.println("Creando directorio...");
+            directorio.mkdirs();
         }
 
-        System.out.println("Archivos disponibles en el servidor:");
-        listarArchivosDisponibles();
+        // Mostrar archivos disponibles
+        System.out.println("Archivos disponibles:");
+        File[] archivos = directorio.listFiles();
+        if (archivos != null) {
+            for (File archivo : archivos) {
+                if (archivo.isFile()) {
+                    System.out.println("  - " + archivo.getName() + " (" + archivo.length() + " bytes)");
+                }
+            }
+        }
+        System.out.println();
 
-        try (DatagramSocket socket = new DatagramSocket(PUERTO, InetAddress.getByName("0.0.0.0"))) {
+        try (DatagramSocket socket = new DatagramSocket(PUERTO)) {
+            socket.setSoTimeout(1000); // Timeout para no bloquear indefinidamente
 
-            System.out.println("\n✓ Servidor iniciado correctamente");
-            System.out.println("  IP: " + socket.getLocalAddress().getHostAddress());
-            System.out.println("  Puerto: " + socket.getLocalPort());
-            System.out.println("\nEsperando solicitudes de clientes...\n");
+            System.out.println("✓ Servidor iniciado en puerto " + PUERTO);
+            System.out.println("✓ Esperando conexiones...\n");
 
             while (true) {
                 try {
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[65507];
                     DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
                     socket.receive(paquete);
 
-                    // Crear hilo para manejar cliente
-                    new Thread(new ManejadorCliente(paquete, socket, directorio)).start();
+                    // Procesar paquete inmediatamente
+                    procesarPaquete(paquete, socket);
 
+                } catch (SocketTimeoutException e) {
+                    // Timeout normal, continuar bucle
+                    continue;
                 } catch (IOException e) {
                     System.err.println("Error recibiendo paquete: " + e.getMessage());
                 }
             }
-        } catch (SocketException e) {
-            System.err.println("Error creando socket: " + e.getMessage());
+
         } catch (Exception e) {
-            System.err.println("Error inesperado: " + e.getMessage());
+            System.err.println("Error en servidor: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // Método para listar archivos disponibles
-    private static void listarArchivosDisponibles() {
-        File directorio = new File(DIRECTORIO_BASE);
-        File[] archivos = directorio.listFiles();
+    private static void procesarPaquete(DatagramPacket paquete, DatagramSocket socket) {
+        String mensaje = new String(paquete.getData(), 0, paquete.getLength());
+        InetAddress ipCliente = paquete.getAddress();
+        int puertoCliente = paquete.getPort();
+        String claveCliente = ipCliente.getHostAddress() + ":" + puertoCliente;
 
-        if (archivos == null || archivos.length == 0) {
-            System.out.println("  No hay archivos en el directorio");
+        System.out.println("\n[+] Paquete de " + claveCliente);
+        System.out.println("  Mensaje: " + mensaje);
+
+        try {
+            if (mensaje.startsWith("SYN:")) {
+                manejarSYN(ipCliente, puertoCliente, mensaje, socket);
+            } else if (mensaje.equals("LISTA")) {
+                manejarLISTA(ipCliente, puertoCliente, socket);
+            } else if (mensaje.startsWith("ACK:")) {
+                // Enviar ACK al hilo del cliente correspondiente
+                HiloCliente hilo = clientesActivos.get(claveCliente);
+                if (hilo != null) {
+                    hilo.procesarACK(mensaje);
+                }
+            } else if (mensaje.startsWith("FIN:")) {
+                // Limpiar cliente
+                clientesActivos.remove(claveCliente);
+                System.out.println("  Cliente " + claveCliente + " desconectado");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error procesando paquete: " + e.getMessage());
+        }
+    }
+
+    private static void manejarSYN(InetAddress ip, int puerto, String mensaje, DatagramSocket socket)
+            throws IOException {
+        String[] partes = mensaje.split(":");
+        if (partes.length < 3) {
+            enviarError(ip, puerto, "SYN inválido", socket);
             return;
         }
 
-        int contador = 0;
-        for (File archivo : archivos) {
-            if (archivo.isFile()) {
-                contador++;
-                System.out.printf("  %2d. %-40s (%d bytes)%n",
-                        contador,
-                        archivo.getName(),
-                        archivo.length());
-            }
+        String nombreArchivo = partes[1];
+        long seqCliente = Long.parseLong(partes[2]);
+        String claveCliente = ip.getHostAddress() + ":" + puerto;
+
+        System.out.println("  Archivo solicitado: " + nombreArchivo);
+
+        // Verificar si el archivo existe
+        File archivo = new File(DIRECTORIO_ARCHIVOS, nombreArchivo);
+        if (!archivo.exists() || !archivo.isFile()) {
+            System.out.println("  ✗ Archivo no encontrado");
+            enviarError(ip, puerto, "Archivo '" + nombreArchivo + "' no existe", socket);
+            return;
         }
-        System.out.println("  Total: " + contador + " archivos disponibles");
+
+        System.out.println("  ✓ Archivo encontrado (" + archivo.length() + " bytes)");
+
+        // Enviar SYN-ACK
+        long seqSynAck = seqCliente + 1;
+        String synAck = "SYN-ACK:" + nombreArchivo + ":" + seqSynAck;
+        enviarMensaje(ip, puerto, synAck, socket);
+        System.out.println("  SYN-ACK enviado (seq=" + seqSynAck + ")");
+
+        // Crear y ejecutar hilo para este cliente
+        HiloCliente hiloCliente = new HiloCliente(ip, puerto, archivo, socket);
+        clientesActivos.put(claveCliente, hiloCliente);
+        new Thread(hiloCliente).start();
     }
 
-    // ===== CLASE PARA MANEJAR CLIENTES =====
+    private static void manejarLISTA(InetAddress ip, int puerto, DatagramSocket socket)
+            throws IOException {
+        System.out.println("  Solicitud de lista de archivos");
 
-    static class ManejadorCliente implements Runnable {
-        private DatagramPacket paqueteInicial;
+        StringBuilder lista = new StringBuilder();
+        lista.append("=== ARCHIVOS DISPONIBLES ===\n\n");
+
+        File directorio = new File(DIRECTORIO_ARCHIVOS);
+        File[] archivos = directorio.listFiles();
+
+        if (archivos == null || archivos.length == 0) {
+            lista.append("No hay archivos en el servidor.\n");
+        } else {
+            int contador = 0;
+            for (File archivo : archivos) {
+                if (archivo.isFile()) {
+                    contador++;
+                    lista.append(String.format("%d. %s (%d bytes)\n",
+                            contador, archivo.getName(), archivo.length()));
+                }
+            }
+            lista.append("\nTotal: ").append(contador).append(" archivos\n");
+        }
+
+        lista.append("\nPara solicitar: SYN:nombre_archivo:secuencia");
+        enviarMensaje(ip, puerto, lista.toString(), socket);
+        System.out.println("  Lista enviada");
+    }
+
+    private static void enviarMensaje(InetAddress ip, int puerto, String mensaje, DatagramSocket socket)
+            throws IOException {
+        byte[] buffer = mensaje.getBytes();
+        DatagramPacket paquete = new DatagramPacket(buffer, buffer.length, ip, puerto);
+        socket.send(paquete);
+    }
+
+    private static void enviarError(InetAddress ip, int puerto, String error, DatagramSocket socket)
+            throws IOException {
+        enviarMensaje(ip, puerto, "ERROR:" + error, socket);
+    }
+
+    // ===== HILO PARA MANEJAR CADA CLIENTE =====
+    static class HiloCliente implements Runnable {
+        private InetAddress ip;
+        private int puerto;
+        private File archivo;
         private DatagramSocket socket;
-        private File directorioBase;
+        private long secuenciaActual = 1000;
+        private boolean esperandoACK = false;
+        private long ultimoSeqEnviado = 0;
+        private Object lock = new Object();
 
-        public ManejadorCliente(DatagramPacket paquete, DatagramSocket socket, File directorio) {
-            this.paqueteInicial = paquete;
+        public HiloCliente(InetAddress ip, int puerto, File archivo, DatagramSocket socket) {
+            this.ip = ip;
+            this.puerto = puerto;
+            this.archivo = archivo;
             this.socket = socket;
-            this.directorioBase = directorio;
         }
 
         @Override
         public void run() {
-            InetAddress ipCliente = paqueteInicial.getAddress();
-            int puertoCliente = paqueteInicial.getPort();
-            String claveCliente = ipCliente.getHostAddress() + ":" + puertoCliente;
-
-            System.out.println("\n[+] Cliente conectado: " + claveCliente);
-
             try {
-                String mensaje = new String(paqueteInicial.getData(), 0, paqueteInicial.getLength());
+                System.out.println("  [HILO] Iniciando envío del archivo: " + archivo.getName());
 
-                if (mensaje.startsWith("SYN:")) {
-                    manejarSYN(ipCliente, puertoCliente, mensaje, claveCliente);
-                } else if (mensaje.equals("LISTA")) {
-                    manejarLista(ipCliente, puertoCliente);
-                } else if (mensaje.startsWith("ACK:")) {
-                    manejarACK(ipCliente, puertoCliente, mensaje, claveCliente);
-                } else if (mensaje.startsWith("FIN:")) {
-                    manejarFIN(ipCliente, puertoCliente, mensaje, claveCliente);
-                }
-            } catch (Exception e) {
-                System.err.println("Error con cliente " + claveCliente + ": " + e.getMessage());
-                sesiones.remove(claveCliente);
-            }
-        }
+                // Leer archivo
+                List<String> lineas = Files.readAllLines(archivo.toPath());
+                System.out.println("  [HILO] Archivo tiene " + lineas.size() + " líneas");
 
-        private void manejarSYN(InetAddress ip, int puerto, String mensaje, String clave)
-                throws IOException {
-            String[] partes = mensaje.split(":");
-            if (partes.length < 3) {
-                enviarError(ip, puerto, "SYN inválido");
-                return;
-            }
+                // Enviar cada línea
+                for (int i = 0; i < lineas.size(); i++) {
+                    String linea = lineas.get(i);
 
-            String nombreArchivo = partes[1];
-            long seq = Long.parseLong(partes[2]);
+                    boolean ackRecibido = false;
+                    int reintentos = 0;
 
-            System.out.println("  Cliente solicita archivo: " + nombreArchivo);
-            System.out.println("  Secuencia inicial: " + seq);
+                    while (!ackRecibido && reintentos < 3) {
+                        synchronized (lock) {
+                            // Enviar DATA
+                            String dataMsg = "DATA:" + secuenciaActual + ":" + linea.length() + ":" + linea;
+                            enviarMensaje(ip, puerto, dataMsg, socket);
+                            esperandoACK = true;
+                            ultimoSeqEnviado = secuenciaActual;
 
-            // Verificar si el archivo existe
-            File archivoSolicitado = new File(directorioBase, nombreArchivo);
-            if (!archivoSolicitado.exists() || !archivoSolicitado.isFile()) {
-                System.out.println("  ✗ Archivo no encontrado: " + nombreArchivo);
-                enviarError(ip, puerto, "Archivo '" + nombreArchivo + "' no encontrado en el servidor");
-                return;
-            }
+                            if (reintentos == 0) {
+                                System.out.println(
+                                        "    [HILO] Enviando línea " + (i + 1) + " (seq=" + secuenciaActual + ")");
+                            } else {
+                                System.out.println("    [HILO] Reintento " + reintentos + " para línea " + (i + 1));
+                            }
+                        }
 
-            System.out.println("  ✓ Archivo encontrado: " + archivoSolicitado.getAbsolutePath());
-            System.out.println("  Tamaño: " + archivoSolicitado.length() + " bytes");
+                        // Esperar ACK por 2 segundos
+                        long inicioEspera = System.currentTimeMillis();
+                        while (esperandoACK && (System.currentTimeMillis() - inicioEspera) < 2000) {
+                            Thread.sleep(100); // Pequeña pausa para no consumir CPU
+                        }
 
-            // Crear nueva sesión
-            SesionCliente sesion = new SesionCliente(ip, puerto, nombreArchivo, archivoSolicitado);
-            sesion.setSecuenciaEsperada(seq + 2);
-            sesiones.put(clave, sesion);
+                        synchronized (lock) {
+                            if (!esperandoACK) {
+                                ackRecibido = true;
+                                secuenciaActual++;
+                                System.out.println("    [HILO] ✓ ACK recibido para línea " + (i + 1));
+                            }
+                        }
 
-            // Enviar SYN-ACK
-            String synAck = "SYN-ACK:" + nombreArchivo + ":" + (seq + 1);
-            enviar(ip, puerto, synAck);
-            System.out.println("  SYN-ACK enviado a " + clave);
-        }
+                        reintentos++;
+                    }
 
-        private void manejarLista(InetAddress ip, int puerto) throws IOException {
-            System.out.println("  Solicitud de lista de archivos recibida");
-
-            StringBuilder lista = new StringBuilder();
-            lista.append("=== ARCHIVOS DISPONIBLES EN SERVIDOR ===\n");
-            lista.append("Directorio: ").append(directorioBase.getName()).append("\n\n");
-
-            File[] archivos = directorioBase.listFiles();
-            if (archivos == null || archivos.length == 0) {
-                lista.append("No hay archivos en este directorio.\n");
-            } else {
-                int contador = 0;
-                for (File archivo : archivos) {
-                    if (archivo.isFile()) {
-                        contador++;
-                        lista.append(String.format("%3d. %-40s (%d bytes)%n",
-                                contador,
-                                archivo.getName(),
-                                archivo.length()));
+                    if (!ackRecibido) {
+                        System.out.println("    [HILO] ✗ No se pudo enviar línea " + (i + 1));
+                        return;
                     }
                 }
-                lista.append("\nTotal: ").append(contador).append(" archivos\n");
-            }
 
-            lista.append("\nPara solicitar un archivo, use:");
-            lista.append("\n  java ClienteUDPConfiable");
-            lista.append("\n  y seleccione 'Solicitar archivo específico'");
+                // Enviar FIN-DATA
+                String finData = "DATA:" + secuenciaActual + ":0:FIN-DATA";
+                enviarMensaje(ip, puerto, finData, socket);
+                System.out.println("  [HILO] ✓ FIN-DATA enviado");
 
-            enviar(ip, puerto, lista.toString());
-            System.out.println("  Lista enviada al cliente");
-        }
+                // Enviar FIN para cerrar conexión
+                Thread.sleep(1000);
+                String fin = "FIN:" + (secuenciaActual + 1);
+                enviarMensaje(ip, puerto, fin, socket);
+                System.out.println("  [HILO] ✓ FIN enviado, conexión cerrada");
 
-        private void manejarACK(InetAddress ip, int puerto, String mensaje, String clave)
-                throws IOException {
-            SesionCliente sesion = sesiones.get(clave);
-            if (sesion == null) {
-                System.out.println("  Sesión no encontrada para ACK de " + clave);
-                return;
-            }
+                System.out.println("  [HILO] ✓ Archivo enviado completamente: " + lineas.size() + " líneas");
 
-            System.out.println("  ACK recibido de " + clave + ": " + mensaje);
-
-            if ("SYN_RCVD".equals(sesion.getEstado())) {
-                sesion.setEstado("ESTABLISHED");
-                System.out.println("  ✓ Conexión establecida con " + clave);
-
-                // Iniciar envío del archivo
-                System.out.println("  Iniciando envío del archivo: " + sesion.getNombreArchivo());
-                enviarArchivo(ip, puerto, sesion);
-
-            } else if ("ENVIANDO".equals(sesion.getEstado())) {
-                // Continuar enviando archivo
-                continuarEnvioArchivo(ip, puerto, sesion);
+            } catch (Exception e) {
+                System.err.println("  [HILO] Error: " + e.getMessage());
             }
         }
 
-        private void manejarFIN(InetAddress ip, int puerto, String mensaje, String clave)
-                throws IOException {
-            SesionCliente sesion = sesiones.get(clave);
-            if (sesion == null)
-                return;
+        public void procesarACK(String ackMsg) {
+            synchronized (lock) {
+                if (ackMsg.startsWith("ACK:")) {
+                    String[] partes = ackMsg.split(":");
+                    long ackSeq = Long.parseLong(partes[1]);
 
-            String[] partes = mensaje.split(":");
-            if (partes.length < 2)
-                return;
-
-            long seq = Long.parseLong(partes[1]);
-
-            if ("ESTABLISHED".equals(sesion.getEstado()) || "ENVIANDO".equals(sesion.getEstado())) {
-                // Paso 2: ACK del FIN del cliente
-                String ack = "ACK:" + seq;
-                enviar(ip, puerto, ack);
-
-                // Paso 3: Enviar nuestro FIN
-                String fin = "FIN:" + (seq + 1);
-                enviar(ip, puerto, fin);
-                sesion.setEstado("FIN_SENT");
-
-                System.out.println("  Four-way handshake iniciado con " + clave);
-            } else if ("FIN_SENT".equals(sesion.getEstado())) {
-                // Paso 4: ACK de nuestro FIN
-                if (mensaje.startsWith("ACK:")) {
-                    sesiones.remove(clave);
-                    System.out.println("  ✓ Conexión cerrada con " + clave);
-                    System.out.println("  Total archivo enviado: " + sesion.getLineasEnviadas() + " líneas");
+                    if (ackSeq == ultimoSeqEnviado && esperandoACK) {
+                        esperandoACK = false;
+                        System.out.println("    [HILO] ACK procesado para seq=" + ackSeq);
+                    }
                 }
             }
         }
 
-        private void enviarArchivo(InetAddress ip, int puerto, SesionCliente sesion)
+        private void enviarMensaje(InetAddress ip, int puerto, String mensaje, DatagramSocket socket)
                 throws IOException {
-            sesion.setEstado("ENVIANDO");
-
-            // Leer archivo
-            BufferedReader lector = new BufferedReader(new FileReader(sesion.getArchivo()));
-            String linea;
-            int numeroLinea = 0;
-
-            // Leer primeras líneas para enviar
-            while ((linea = lector.readLine()) != null && numeroLinea < 10) {
-                long seq = sesion.getSecuenciaEnvio();
-                String dataPacket = "DATA:" + seq + ":" + linea.length() + ":" + linea;
-
-                // Enviar línea
-                enviar(ip, puerto, dataPacket);
-                sesion.incrementarSecuenciaEnvio();
-                sesion.incrementarLineasEnviadas();
-                numeroLinea++;
-
-                System.out.println("    Línea " + numeroLinea + " enviada (seq=" + seq + ")");
-            }
-
-            if (linea == null) {
-                // Archivo completo enviado
-                System.out.println("  Archivo completo enviado (" + sesion.getLineasEnviadas() + " líneas)");
-
-                // Enviar FIN-DATA
-                long finSeq = sesion.getSecuenciaEnvio();
-                String finData = "DATA:" + finSeq + ":0:FIN";
-                enviar(ip, puerto, finData);
-                System.out.println("  FIN-DATA enviado (seq=" + finSeq + ")");
-
-                sesion.setEstado("TRANSFER_COMPLETE");
-            }
-
-            lector.close();
-        }
-
-        private void continuarEnvioArchivo(InetAddress ip, int puerto, SesionCliente sesion)
-                throws IOException {
-            if ("TRANSFER_COMPLETE".equals(sesion.getEstado())) {
-                return; // Transferencia ya completada
-            }
-
-            BufferedReader lector = new BufferedReader(new FileReader(sesion.getArchivo()));
-
-            // Saltar líneas ya enviadas
-            for (int i = 0; i < sesion.getLineasEnviadas(); i++) {
-                lector.readLine();
-            }
-
-            String linea;
-            int lineasEnEsteBloque = 0;
-
-            // Enviar siguiente bloque de líneas
-            while ((linea = lector.readLine()) != null && lineasEnEsteBloque < 10) {
-                long seq = sesion.getSecuenciaEnvio();
-                String dataPacket = "DATA:" + seq + ":" + linea.length() + ":" + linea;
-
-                enviar(ip, puerto, dataPacket);
-                sesion.incrementarSecuenciaEnvio();
-                sesion.incrementarLineasEnviadas();
-                lineasEnEsteBloque++;
-
-                if (sesion.getLineasEnviadas() % 50 == 0) {
-                    System.out.println("    " + sesion.getLineasEnviadas() + " líneas enviadas...");
-                }
-            }
-
-            if (linea == null) {
-                // Archivo completo enviado
-                System.out.println("  ✓ Archivo completo enviado: " + sesion.getLineasEnviadas() + " líneas");
-
-                // Enviar FIN-DATA
-                long finSeq = sesion.getSecuenciaEnvio();
-                String finData = "DATA:" + finSeq + ":0:FIN";
-                enviar(ip, puerto, finData);
-                System.out.println("  FIN-DATA enviado (seq=" + finSeq + ")");
-
-                sesion.setEstado("TRANSFER_COMPLETE");
-            }
-
-            lector.close();
-        }
-
-        private void enviar(InetAddress ip, int puerto, String mensaje) throws IOException {
             byte[] buffer = mensaje.getBytes();
             DatagramPacket paquete = new DatagramPacket(buffer, buffer.length, ip, puerto);
             socket.send(paquete);
-        }
-
-        private void enviarError(InetAddress ip, int puerto, String error) throws IOException {
-            enviar(ip, puerto, "ERROR:" + error);
-        }
-    }
-
-    // ===== CLASE PARA SESIONES DE CLIENTE =====
-
-    static class SesionCliente {
-        private InetAddress ip;
-        private int puerto;
-        private String nombreArchivo;
-        private File archivo;
-        private long secuenciaEnvio;
-        private String estado;
-        private int lineasEnviadas;
-
-        public SesionCliente(InetAddress ip, int puerto, String nombreArchivo, File archivo) {
-            this.ip = ip;
-            this.puerto = puerto;
-            this.nombreArchivo = nombreArchivo;
-            this.archivo = archivo;
-            this.secuenciaEnvio = 1000; // Secuencia inicial para envío
-            this.estado = "SYN_RCVD";
-            this.lineasEnviadas = 0;
-        }
-
-        public InetAddress getIp() {
-            return ip;
-        }
-
-        public int getPuerto() {
-            return puerto;
-        }
-
-        public String getNombreArchivo() {
-            return nombreArchivo;
-        }
-
-        public File getArchivo() {
-            return archivo;
-        }
-
-        public long getSecuenciaEnvio() {
-            return secuenciaEnvio;
-        }
-
-        public String getEstado() {
-            return estado;
-        }
-
-        public int getLineasEnviadas() {
-            return lineasEnviadas;
-        }
-
-        public void setSecuenciaEsperada(long seq) {
-            this.secuenciaEnvio = seq;
-        }
-
-        public void setEstado(String estado) {
-            this.estado = estado;
-        }
-
-        public void incrementarSecuenciaEnvio() {
-            secuenciaEnvio++;
-        }
-
-        public void incrementarLineasEnviadas() {
-            lineasEnviadas++;
         }
     }
 }
