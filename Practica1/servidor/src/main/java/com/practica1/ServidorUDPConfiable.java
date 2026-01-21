@@ -4,37 +4,46 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.*;
 import java.util.concurrent.*;
+import java.util.*;
 
 public class ServidorUDPConfiable {
     private static final int PUERTO = 22000;
     private static final ConcurrentHashMap<String, SesionCliente> sesiones = new ConcurrentHashMap<>();
-    private static final String DIRECTORIO_ARCHIVOS = "archivos_recibidos";
+    private static final String DIRECTORIO_BASE = "/Users/hectorcortes/Downloads";
 
     public static void main(String[] args) {
         System.out.println("=== SERVIDOR UDP CONFIABLE ===");
         System.out.println("Puerto: " + PUERTO);
+        System.out.println("Directorio base: " + DIRECTORIO_BASE);
         System.out.println("Escuchando en todas las interfaces");
-        System.out.println("Directorio archivos: " + DIRECTORIO_ARCHIVOS);
         System.out.println("==============================\n");
+
+        // Verificar que el directorio existe
+        File directorio = new File(DIRECTORIO_BASE);
+        if (!directorio.exists() || !directorio.isDirectory()) {
+            System.err.println("ERROR: El directorio base no existe o no es válido");
+            System.err.println("Directorio: " + DIRECTORIO_BASE);
+            return;
+        }
+
+        System.out.println("Archivos disponibles en el servidor:");
+        listarArchivosDisponibles();
 
         try (DatagramSocket socket = new DatagramSocket(PUERTO, InetAddress.getByName("0.0.0.0"))) {
 
-            System.out.println("✓ Servidor iniciado correctamente");
+            System.out.println("\n✓ Servidor iniciado correctamente");
             System.out.println("  IP: " + socket.getLocalAddress().getHostAddress());
             System.out.println("  Puerto: " + socket.getLocalPort());
-            System.out.println("\nEsperando conexiones de clientes...\n");
-
-            // Crear directorio para archivos
-            new File(DIRECTORIO_ARCHIVOS).mkdirs();
+            System.out.println("\nEsperando solicitudes de clientes...\n");
 
             while (true) {
                 try {
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[4096];
                     DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
                     socket.receive(paquete);
 
                     // Crear hilo para manejar cliente
-                    new Thread(new ManejadorCliente(paquete, socket)).start();
+                    new Thread(new ManejadorCliente(paquete, socket, directorio)).start();
 
                 } catch (IOException e) {
                     System.err.println("Error recibiendo paquete: " + e.getMessage());
@@ -42,13 +51,32 @@ public class ServidorUDPConfiable {
             }
         } catch (SocketException e) {
             System.err.println("Error creando socket: " + e.getMessage());
-            System.err.println("Posibles causas:");
-            System.err.println("  1. Puerto " + PUERTO + " ya está en uso");
-            System.err.println("  2. No hay permisos (en Linux: sudo)");
-            System.err.println("  3. Firewall bloqueando el puerto");
         } catch (Exception e) {
             System.err.println("Error inesperado: " + e.getMessage());
         }
+    }
+
+    // Método para listar archivos disponibles
+    private static void listarArchivosDisponibles() {
+        File directorio = new File(DIRECTORIO_BASE);
+        File[] archivos = directorio.listFiles();
+
+        if (archivos == null || archivos.length == 0) {
+            System.out.println("  No hay archivos en el directorio");
+            return;
+        }
+
+        int contador = 0;
+        for (File archivo : archivos) {
+            if (archivo.isFile()) {
+                contador++;
+                System.out.printf("  %2d. %-40s (%d bytes)%n",
+                        contador,
+                        archivo.getName(),
+                        archivo.length());
+            }
+        }
+        System.out.println("  Total: " + contador + " archivos disponibles");
     }
 
     // ===== CLASE PARA MANEJAR CLIENTES =====
@@ -56,10 +84,12 @@ public class ServidorUDPConfiable {
     static class ManejadorCliente implements Runnable {
         private DatagramPacket paqueteInicial;
         private DatagramSocket socket;
+        private File directorioBase;
 
-        public ManejadorCliente(DatagramPacket paquete, DatagramSocket socket) {
+        public ManejadorCliente(DatagramPacket paquete, DatagramSocket socket, File directorio) {
             this.paqueteInicial = paquete;
             this.socket = socket;
+            this.directorioBase = directorio;
         }
 
         @Override
@@ -68,19 +98,19 @@ public class ServidorUDPConfiable {
             int puertoCliente = paqueteInicial.getPort();
             String claveCliente = ipCliente.getHostAddress() + ":" + puertoCliente;
 
-            System.out.println("\n[+] Nuevo cliente: " + claveCliente);
+            System.out.println("\n[+] Cliente conectado: " + claveCliente);
 
             try {
                 String mensaje = new String(paqueteInicial.getData(), 0, paqueteInicial.getLength());
 
                 if (mensaje.startsWith("SYN:")) {
                     manejarSYN(ipCliente, puertoCliente, mensaje, claveCliente);
-                } else if (mensaje.startsWith("DATA:")) {
-                    manejarDATA(ipCliente, puertoCliente, mensaje, claveCliente);
-                } else if (mensaje.startsWith("FIN:")) {
-                    manejarFIN(ipCliente, puertoCliente, mensaje, claveCliente);
+                } else if (mensaje.equals("LISTA")) {
+                    manejarLista(ipCliente, puertoCliente);
                 } else if (mensaje.startsWith("ACK:")) {
                     manejarACK(ipCliente, puertoCliente, mensaje, claveCliente);
+                } else if (mensaje.startsWith("FIN:")) {
+                    manejarFIN(ipCliente, puertoCliente, mensaje, claveCliente);
                 }
             } catch (Exception e) {
                 System.err.println("Error con cliente " + claveCliente + ": " + e.getMessage());
@@ -99,11 +129,22 @@ public class ServidorUDPConfiable {
             String nombreArchivo = partes[1];
             long seq = Long.parseLong(partes[2]);
 
-            System.out.println("  SYN recibido para archivo: " + nombreArchivo);
+            System.out.println("  Cliente solicita archivo: " + nombreArchivo);
             System.out.println("  Secuencia inicial: " + seq);
 
+            // Verificar si el archivo existe
+            File archivoSolicitado = new File(directorioBase, nombreArchivo);
+            if (!archivoSolicitado.exists() || !archivoSolicitado.isFile()) {
+                System.out.println("  ✗ Archivo no encontrado: " + nombreArchivo);
+                enviarError(ip, puerto, "Archivo '" + nombreArchivo + "' no encontrado en el servidor");
+                return;
+            }
+
+            System.out.println("  ✓ Archivo encontrado: " + archivoSolicitado.getAbsolutePath());
+            System.out.println("  Tamaño: " + archivoSolicitado.length() + " bytes");
+
             // Crear nueva sesión
-            SesionCliente sesion = new SesionCliente(ip, puerto, nombreArchivo);
+            SesionCliente sesion = new SesionCliente(ip, puerto, nombreArchivo, archivoSolicitado);
             sesion.setSecuenciaEsperada(seq + 2);
             sesiones.put(clave, sesion);
 
@@ -113,54 +154,59 @@ public class ServidorUDPConfiable {
             System.out.println("  SYN-ACK enviado a " + clave);
         }
 
-        private void manejarDATA(InetAddress ip, int puerto, String mensaje, String clave)
+        private void manejarLista(InetAddress ip, int puerto) throws IOException {
+            System.out.println("  Solicitud de lista de archivos recibida");
+
+            StringBuilder lista = new StringBuilder();
+            lista.append("=== ARCHIVOS DISPONIBLES EN SERVIDOR ===\n");
+            lista.append("Directorio: ").append(directorioBase.getName()).append("\n\n");
+
+            File[] archivos = directorioBase.listFiles();
+            if (archivos == null || archivos.length == 0) {
+                lista.append("No hay archivos en este directorio.\n");
+            } else {
+                int contador = 0;
+                for (File archivo : archivos) {
+                    if (archivo.isFile()) {
+                        contador++;
+                        lista.append(String.format("%3d. %-40s (%d bytes)%n",
+                                contador,
+                                archivo.getName(),
+                                archivo.length()));
+                    }
+                }
+                lista.append("\nTotal: ").append(contador).append(" archivos\n");
+            }
+
+            lista.append("\nPara solicitar un archivo, use:");
+            lista.append("\n  java ClienteUDPConfiable");
+            lista.append("\n  y seleccione 'Solicitar archivo específico'");
+
+            enviar(ip, puerto, lista.toString());
+            System.out.println("  Lista enviada al cliente");
+        }
+
+        private void manejarACK(InetAddress ip, int puerto, String mensaje, String clave)
                 throws IOException {
             SesionCliente sesion = sesiones.get(clave);
             if (sesion == null) {
-                enviarError(ip, puerto, "No hay sesión activa");
+                System.out.println("  Sesión no encontrada para ACK de " + clave);
                 return;
             }
 
-            String[] partes = mensaje.split(":", 4);
-            if (partes.length < 4) {
-                enviarError(ip, puerto, "DATA inválido");
-                return;
-            }
+            System.out.println("  ACK recibido de " + clave + ": " + mensaje);
 
-            long seq = Long.parseLong(partes[1]);
-            int tamano = Integer.parseInt(partes[2]);
-            String datos = partes[3];
+            if ("SYN_RCVD".equals(sesion.getEstado())) {
+                sesion.setEstado("ESTABLISHED");
+                System.out.println("  ✓ Conexión establecida con " + clave);
 
-            // Verificar secuencia
-            if (seq == sesion.getSecuenciaEsperada()) {
-                if (tamano == 0) { // FIN-DATA
-                    System.out.println("  FIN-DATA recibido de " + clave);
-                    System.out.println("  Guardando archivo y preparando respuesta...");
+                // Iniciar envío del archivo
+                System.out.println("  Iniciando envío del archivo: " + sesion.getNombreArchivo());
+                enviarArchivo(ip, puerto, sesion);
 
-                    // Guardar archivo recibido
-                    guardarArchivo(sesion);
-
-                    // Reenviar archivo al cliente
-                    reenviarArchivo(ip, puerto, sesion);
-
-                } else {
-                    // Agregar datos a la sesión
-                    sesion.agregarDatos(datos + "\n");
-                    sesion.incrementarSecuencia();
-                    System.out.println("  DATA recibido: " + datos.substring(0, Math.min(30, datos.length())) +
-                            "... (seq=" + seq + ")");
-                }
-
-                // Enviar ACK
-                String ack = "ACK:" + seq;
-                enviar(ip, puerto, ack);
-
-            } else {
-                // Secuencia incorrecta, reenviar ACK anterior
-                System.out.println("  Secuencia incorrecta, esperaba: " + sesion.getSecuenciaEsperada());
-                long ultimoAck = sesion.getSecuenciaEsperada() - 1;
-                String ack = "ACK:" + ultimoAck;
-                enviar(ip, puerto, ack);
+            } else if ("ENVIANDO".equals(sesion.getEstado())) {
+                // Continuar enviando archivo
+                continuarEnvioArchivo(ip, puerto, sesion);
             }
         }
 
@@ -176,7 +222,7 @@ public class ServidorUDPConfiable {
 
             long seq = Long.parseLong(partes[1]);
 
-            if ("ESTABLISHED".equals(sesion.getEstado())) {
+            if ("ESTABLISHED".equals(sesion.getEstado()) || "ENVIANDO".equals(sesion.getEstado())) {
                 // Paso 2: ACK del FIN del cliente
                 String ack = "ACK:" + seq;
                 enviar(ip, puerto, ack);
@@ -192,90 +238,95 @@ public class ServidorUDPConfiable {
                 if (mensaje.startsWith("ACK:")) {
                     sesiones.remove(clave);
                     System.out.println("  ✓ Conexión cerrada con " + clave);
+                    System.out.println("  Total archivo enviado: " + sesion.getLineasEnviadas() + " líneas");
                 }
             }
         }
 
-        private void manejarACK(InetAddress ip, int puerto, String mensaje, String clave)
+        private void enviarArchivo(InetAddress ip, int puerto, SesionCliente sesion)
                 throws IOException {
-            SesionCliente sesion = sesiones.get(clave);
-            if (sesion == null)
-                return;
+            sesion.setEstado("ENVIANDO");
 
-            if ("SYN_RCVD".equals(sesion.getEstado())) {
-                sesion.setEstado("ESTABLISHED");
-                System.out.println("  ✓ Conexión establecida con " + clave);
+            // Leer archivo
+            BufferedReader lector = new BufferedReader(new FileReader(sesion.getArchivo()));
+            String linea;
+            int numeroLinea = 0;
+
+            // Leer primeras líneas para enviar
+            while ((linea = lector.readLine()) != null && numeroLinea < 10) {
+                long seq = sesion.getSecuenciaEnvio();
+                String dataPacket = "DATA:" + seq + ":" + linea.length() + ":" + linea;
+
+                // Enviar línea
+                enviar(ip, puerto, dataPacket);
+                sesion.incrementarSecuenciaEnvio();
+                sesion.incrementarLineasEnviadas();
+                numeroLinea++;
+
+                System.out.println("    Línea " + numeroLinea + " enviada (seq=" + seq + ")");
             }
+
+            if (linea == null) {
+                // Archivo completo enviado
+                System.out.println("  Archivo completo enviado (" + sesion.getLineasEnviadas() + " líneas)");
+
+                // Enviar FIN-DATA
+                long finSeq = sesion.getSecuenciaEnvio();
+                String finData = "DATA:" + finSeq + ":0:FIN";
+                enviar(ip, puerto, finData);
+                System.out.println("  FIN-DATA enviado (seq=" + finSeq + ")");
+
+                sesion.setEstado("TRANSFER_COMPLETE");
+            }
+
+            lector.close();
         }
 
-        private void guardarArchivo(SesionCliente sesion) {
-            try {
-                String nombreArchivo = "cliente_" +
-                        sesion.getIp().getHostAddress().replace('.', '_') + "_" +
-                        sesion.getNombreArchivo();
-
-                Path ruta = Paths.get(DIRECTORIO_ARCHIVOS, nombreArchivo);
-                Files.write(ruta, sesion.getDatos().getBytes());
-
-                System.out.println("  Archivo guardado: " + ruta);
-                System.out.println("  Tamaño: " + sesion.getDatos().length() + " bytes");
-
-            } catch (IOException e) {
-                System.err.println("  Error guardando archivo: " + e.getMessage());
-            }
-        }
-
-        private void reenviarArchivo(InetAddress ip, int puerto, SesionCliente sesion)
+        private void continuarEnvioArchivo(InetAddress ip, int puerto, SesionCliente sesion)
                 throws IOException {
-            String contenido = sesion.getDatos();
-            String[] lineas = contenido.split("\n");
+            if ("TRANSFER_COMPLETE".equals(sesion.getEstado())) {
+                return; // Transferencia ya completada
+            }
 
-            System.out.println("  Reenviando " + lineas.length + " líneas al cliente");
+            BufferedReader lector = new BufferedReader(new FileReader(sesion.getArchivo()));
 
-            long seqReenvio = 10000; // Secuencia diferente para reenvío
+            // Saltar líneas ya enviadas
+            for (int i = 0; i < sesion.getLineasEnviadas(); i++) {
+                lector.readLine();
+            }
 
-            for (int i = 0; i < lineas.length; i++) {
-                String linea = lineas[i].trim();
-                if (linea.isEmpty())
-                    continue;
+            String linea;
+            int lineasEnEsteBloque = 0;
 
-                String dataPacket = "DATA:" + seqReenvio + ":" + linea.length() + ":" + linea;
+            // Enviar siguiente bloque de líneas
+            while ((linea = lector.readLine()) != null && lineasEnEsteBloque < 10) {
+                long seq = sesion.getSecuenciaEnvio();
+                String dataPacket = "DATA:" + seq + ":" + linea.length() + ":" + linea;
 
-                boolean ackRecibido = false;
-                for (int intento = 1; intento <= 3 && !ackRecibido; intento++) {
-                    try {
-                        enviar(ip, puerto, dataPacket);
+                enviar(ip, puerto, dataPacket);
+                sesion.incrementarSecuenciaEnvio();
+                sesion.incrementarLineasEnviadas();
+                lineasEnEsteBloque++;
 
-                        // Esperar ACK
-                        byte[] buffer = new byte[1024];
-                        DatagramPacket ackPacket = new DatagramPacket(buffer, buffer.length);
-                        socket.setSoTimeout(1000);
-
-                        try {
-                            socket.receive(ackPacket);
-                            String ackMsg = new String(ackPacket.getData(), 0, ackPacket.getLength());
-
-                            if (ackMsg.equals("ACK:" + seqReenvio)) {
-                                ackRecibido = true;
-                                System.out.println("    Línea " + (i + 1) + " reenviada correctamente");
-                            }
-                        } catch (SocketTimeoutException e) {
-                            System.out.println("    Timeout línea " + (i + 1) + ", reintento " + intento);
-                        } finally {
-                            socket.setSoTimeout(0);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Error reenviando línea: " + e.getMessage());
-                    }
+                if (sesion.getLineasEnviadas() % 50 == 0) {
+                    System.out.println("    " + sesion.getLineasEnviadas() + " líneas enviadas...");
                 }
-
-                seqReenvio++;
             }
 
-            // Enviar FIN del reenvío
-            String finReenvio = "DATA:" + seqReenvio + ":0:FIN";
-            enviar(ip, puerto, finReenvio);
-            System.out.println("  ✓ Reenvío completado");
+            if (linea == null) {
+                // Archivo completo enviado
+                System.out.println("  ✓ Archivo completo enviado: " + sesion.getLineasEnviadas() + " líneas");
+
+                // Enviar FIN-DATA
+                long finSeq = sesion.getSecuenciaEnvio();
+                String finData = "DATA:" + finSeq + ":0:FIN";
+                enviar(ip, puerto, finData);
+                System.out.println("  FIN-DATA enviado (seq=" + finSeq + ")");
+
+                sesion.setEstado("TRANSFER_COMPLETE");
+            }
+
+            lector.close();
         }
 
         private void enviar(InetAddress ip, int puerto, String mensaje) throws IOException {
@@ -295,17 +346,19 @@ public class ServidorUDPConfiable {
         private InetAddress ip;
         private int puerto;
         private String nombreArchivo;
-        private StringBuilder datos;
-        private long secuenciaEsperada;
+        private File archivo;
+        private long secuenciaEnvio;
         private String estado;
+        private int lineasEnviadas;
 
-        public SesionCliente(InetAddress ip, int puerto, String nombreArchivo) {
+        public SesionCliente(InetAddress ip, int puerto, String nombreArchivo, File archivo) {
             this.ip = ip;
             this.puerto = puerto;
             this.nombreArchivo = nombreArchivo;
-            this.datos = new StringBuilder();
-            this.secuenciaEsperada = 1;
+            this.archivo = archivo;
+            this.secuenciaEnvio = 1000; // Secuencia inicial para envío
             this.estado = "SYN_RCVD";
+            this.lineasEnviadas = 0;
         }
 
         public InetAddress getIp() {
@@ -320,32 +373,36 @@ public class ServidorUDPConfiable {
             return nombreArchivo;
         }
 
-        public String getDatos() {
-            return datos.toString();
+        public File getArchivo() {
+            return archivo;
         }
 
-        public long getSecuenciaEsperada() {
-            return secuenciaEsperada;
+        public long getSecuenciaEnvio() {
+            return secuenciaEnvio;
         }
 
         public String getEstado() {
             return estado;
         }
 
+        public int getLineasEnviadas() {
+            return lineasEnviadas;
+        }
+
         public void setSecuenciaEsperada(long seq) {
-            this.secuenciaEsperada = seq;
+            this.secuenciaEnvio = seq;
         }
 
         public void setEstado(String estado) {
             this.estado = estado;
         }
 
-        public void agregarDatos(String nuevosDatos) {
-            datos.append(nuevosDatos);
+        public void incrementarSecuenciaEnvio() {
+            secuenciaEnvio++;
         }
 
-        public void incrementarSecuencia() {
-            secuenciaEsperada++;
+        public void incrementarLineasEnviadas() {
+            lineasEnviadas++;
         }
     }
 }
