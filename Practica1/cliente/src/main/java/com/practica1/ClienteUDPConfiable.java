@@ -27,7 +27,7 @@ public class ClienteUDPConfiable {
 
             // Crear socket UDP
             DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(3000); // Timeout de 3 segundos
+            socket.setSoTimeout(5000); // Timeout de 5 segundos
 
             // Obtener IP local (origen)
             String ipLocal = InetAddress.getLocalHost().getHostAddress();
@@ -43,7 +43,7 @@ public class ClienteUDPConfiable {
             System.out.println("  SYN enviado: " + syn);
 
             // Paso 2: Recibir SYN-ACK
-            DatagramPacket respuesta = recibirPaquete(socket);
+            DatagramPacket respuesta = recibirPaqueteConTimeout(socket, 5000);
             String synAck = new String(respuesta.getData(), 0, respuesta.getLength());
 
             if (!synAck.startsWith("SYN-ACK:")) {
@@ -68,6 +68,11 @@ public class ClienteUDPConfiable {
             int lineasEnviadas = 0;
 
             while ((linea = lector.readLine()) != null) {
+                // Ignorar líneas vacías
+                if (linea.trim().isEmpty()) {
+                    continue;
+                }
+
                 // Crear paquete DATA
                 String dataPacket = "DATA:" + numeroSecuencia + ":" + linea.length() + ":" + linea;
 
@@ -87,9 +92,12 @@ public class ClienteUDPConfiable {
                             ackRecibido = true;
                             lineasEnviadas++;
                             System.out.println("    ACK recibido para seq=" + numeroSecuencia);
+                        } else if (ack.startsWith("ERROR:")) {
+                            System.err.println("ERROR del servidor: " + ack);
+                            break;
                         }
                     } catch (SocketTimeoutException e) {
-                        System.out.println("cleaTimeout, reintentando...");
+                        System.out.println("    Timeout, reintentando...");
                     }
                 }
 
@@ -111,14 +119,18 @@ public class ClienteUDPConfiable {
 
             // Enviar paquete FIN de datos (tamaño 0)
             String finData = "DATA:" + numeroSecuencia + ":0:FIN";
-            boolean finAckRecibido = false;
-            for (int intento = 1; intento <= 3 && !finAckRecibido; intento++) {
-                try {
-                    enviarPaquete(socket, ipServidor, puertoServidor, finData);
-                    finAckRecibido = true;
-                } catch (SocketTimeoutException e) {
-                    System.out.println("    Reintentando envío de paquete final...");
+            enviarPaquete(socket, ipServidor, puertoServidor, finData);
+            System.out.println("  FIN-DATA enviado: " + finData);
+
+            // Esperar ACK del FIN-DATA
+            try {
+                DatagramPacket ackFinData = recibirPaqueteConTimeout(socket, 3000);
+                String ack = new String(ackFinData.getData(), 0, ackFinData.getLength());
+                if (ack.equals("ACK:" + numeroSecuencia)) {
+                    System.out.println("  ACK recibido para FIN-DATA");
                 }
+            } catch (SocketTimeoutException e) {
+                System.out.println("  No se recibió ACK para FIN-DATA, continuando...");
             }
 
             numeroSecuencia++;
@@ -126,14 +138,19 @@ public class ClienteUDPConfiable {
             // ===== RECIBIENDO ARCHIVO DEL SERVIDOR =====
             System.out.println("\n[3] Recibiendo archivo del servidor...");
 
-            FileWriter escritor = new FileWriter(nombreArchivo);
+            // Crear nombre diferente para el archivo recibido
+            String nombreArchivoRecibido = nombreArchivo.replace(".txt", "_recibido.txt");
+            FileWriter escritor = new FileWriter(nombreArchivoRecibido);
             int lineasRecibidas = 0;
             boolean recepcionTerminada = false;
+            socket.setSoTimeout(5000); // Aumentar timeout para recepción
 
             while (!recepcionTerminada) {
                 try {
-                    DatagramPacket dataRx = recibirPaqueteConTimeout(socket, 2000);
+                    DatagramPacket dataRx = recibirPaquete(socket);
                     String dataMsg = new String(dataRx.getData(), 0, dataRx.getLength());
+
+                    System.out.println("  Paquete recibido: " + dataMsg); // DEBUG
 
                     if (dataMsg.startsWith("DATA:")) {
                         String[] partes = dataMsg.split(":", 4);
@@ -142,66 +159,82 @@ public class ClienteUDPConfiable {
                             int tamanio = Integer.parseInt(partes[2]);
                             String lineaRx = partes[3];
 
-                            // Enviar ACK
+                            // Enviar ACK inmediatamente
                             String ack = "ACK:" + seqRx;
                             enviarPaquete(socket, ipServidor, puertoServidor, ack);
+                            System.out.println("    ACK enviado: " + ack);
 
-                            if (tamanio > 0) {
+                            if (tamanio > 0 && !lineaRx.equals("FIN")) {
                                 escritor.write(lineaRx + "\n");
                                 lineasRecibidas++;
-                                System.out.println("  Línea " + lineasRecibidas + " recibida de servidor");
-                            } else {
+                                System.out.println("  Línea " + lineasRecibidas + " recibida: '" + lineaRx + "'");
+                            } else if (tamanio == 0) {
                                 // FIN de transferencia desde servidor
-                                System.out.println("  Transferencia desde servidor completada");
+                                System.out.println("  FIN recibido del servidor, transferencia completada");
                                 recepcionTerminada = true;
                             }
                         }
+                    } else if (dataMsg.startsWith("ERROR:")) {
+                        System.err.println("ERROR del servidor: " + dataMsg);
+                        break;
+                    } else if (dataMsg.startsWith("FIN:")) {
+                        // El servidor inició el cierre
+                        System.out.println("  FIN recibido, iniciando cierre...");
+                        recepcionTerminada = true;
                     }
                 } catch (SocketTimeoutException e) {
-                    System.out.println("ERROR: Timeout esperando datos del servidor");
+                    System.out.println("INFO: Timeout esperando más datos del servidor, continuando con cierre...");
+                    recepcionTerminada = true;
+                } catch (Exception e) {
+                    System.err.println("ERROR procesando paquete: " + e.getMessage());
                     break;
                 }
             }
 
             escritor.close();
-            System.out.println(lineasRecibidas + " líneas recibidas y guardadas en copia local");
+            socket.setSoTimeout(0); // Restaurar timeout a infinito
+            System.out.println(lineasRecibidas + " líneas recibidas y guardadas en: " + nombreArchivoRecibido);
 
             // ===== FOUR-WAY HANDSHAKE =====
             System.out.println("\n[4] Cerrando conexión (Four-Way Handshake)...");
 
             // Paso 1: Cliente envía FIN
-            String fin = "FIN:" + (numeroSecuencia + 1);
+            String fin = "FIN:" + numeroSecuencia;
             enviarPaquete(socket, ipServidor, puertoServidor, fin);
             System.out.println("  FIN enviado: " + fin);
 
             // Paso 2: Recibir ACK del servidor
-            DatagramPacket ackFinPacket = recibirPaqueteConTimeout(socket, 2000);
-            String ackFinMsg = new String(ackFinPacket.getData(), 0, ackFinPacket.getLength());
+            DatagramPacket ackFinPacket = recibirPaqueteConTimeout(socket, 3000);
+            if (ackFinPacket != null) {
+                String ackFinMsg = new String(ackFinPacket.getData(), 0, ackFinPacket.getLength());
 
-            if (!ackFinMsg.startsWith("ACK:")) {
-                System.err.println("ERROR: No se recibió ACK para FIN");
-                socket.close();
-                return;
+                if (!ackFinMsg.startsWith("ACK:")) {
+                    System.err.println("ERROR: No se recibió ACK válido para FIN");
+                } else {
+                    System.out.println("  ACK recibido: " + ackFinMsg);
+                }
+            } else {
+                System.out.println("  No se recibió ACK para FIN, continuando...");
             }
-            System.out.println("  ACK recibido: " + ackFinMsg);
 
             // Paso 3: Recibir FIN del servidor
-            DatagramPacket finServidorPacket = recibirPaqueteConTimeout(socket, 2000);
-            String finServidor = new String(finServidorPacket.getData(), 0, finServidorPacket.getLength());
+            DatagramPacket finServidorPacket = recibirPaqueteConTimeout(socket, 3000);
+            if (finServidorPacket != null) {
+                String finServidor = new String(finServidorPacket.getData(), 0, finServidorPacket.getLength());
 
-            if (!finServidor.startsWith("FIN:")) {
-                System.err.println("ERROR: No se recibió FIN del servidor");
-                socket.close();
-                return;
+                if (!finServidor.startsWith("FIN:")) {
+                    System.err.println("ERROR: No se recibió FIN del servidor");
+                } else {
+                    System.out.println("  FIN recibido: " + finServidor);
+
+                    // Paso 4: Enviar ACK final
+                    String[] partes = finServidor.split(":");
+                    long seqFin = Long.parseLong(partes[1]);
+                    String ackFinal = "ACK:" + seqFin;
+                    enviarPaquete(socket, ipServidor, puertoServidor, ackFinal);
+                    System.out.println("  ACK final enviado: " + ackFinal);
+                }
             }
-            System.out.println("  FIN recibido: " + finServidor);
-
-            // Paso 4: Enviar ACK final
-            String[] partes = finServidor.split(":");
-            long seqFin = Long.parseLong(partes[1]);
-            String ackFinal = "ACK:" + seqFin;
-            enviarPaquete(socket, ipServidor, puertoServidor, ackFinal);
-            System.out.println("  ACK final enviado: " + ackFinal);
 
             // Cerrar conexión
             socket.close();
@@ -209,7 +242,7 @@ public class ClienteUDPConfiable {
             System.out.println("\n✅ Transferencia completada exitosamente!");
             System.out.println("   Archivo original enviado: " + nombreArchivo);
             System.out.println("   Líneas enviadas al servidor: " + lineasEnviadas);
-            System.out.println("   Copia recibida y guardada: " + nombreArchivo);
+            System.out.println("   Copia recibida y guardada: " + nombreArchivoRecibido);
             System.out.println("   Líneas recibidas de servidor: " + lineasRecibidas);
             System.out.println("   Servidor: " + ipDestino + ":5000");
 
@@ -222,6 +255,7 @@ public class ClienteUDPConfiable {
             e.printStackTrace();
         } catch (Exception e) {
             System.err.println("ERROR inesperado: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -245,7 +279,12 @@ public class ClienteUDPConfiable {
             throws IOException {
         socket.setSoTimeout(timeoutMs);
         try {
-            return recibirPaquete(socket);
+            byte[] buffer = new byte[1024];
+            DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
+            socket.receive(paquete);
+            return paquete;
+        } catch (SocketTimeoutException e) {
+            return null;
         } finally {
             socket.setSoTimeout(0); // Restaurar timeout
         }
