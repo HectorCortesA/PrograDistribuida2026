@@ -9,6 +9,7 @@ public class Sesion {
     private StringBuilder datos;
     private long secuenciaEsperada;
     private String estado;
+    private long secuenciaCliente;
 
     public Sesion(InetAddress ip, int puerto, String nombreArchivo) {
         this.ip = ip;
@@ -16,6 +17,7 @@ public class Sesion {
         this.nombreArchivo = nombreArchivo;
         this.datos = new StringBuilder();
         this.secuenciaEsperada = 1;
+        this.secuenciaCliente = 0;
         this.estado = Configuracion.ESTADO_SYN_RECIBIDO;
     }
 
@@ -40,6 +42,10 @@ public class Sesion {
         return secuenciaEsperada;
     }
 
+    public long getSecuenciaCliente() {
+        return secuenciaCliente;
+    }
+
     public String getEstado() {
         return estado;
     }
@@ -53,16 +59,41 @@ public class Sesion {
         this.secuenciaEsperada = secuencia;
     }
 
+    public void setSecuenciaCliente(long secuencia) {
+        this.secuenciaCliente = secuencia;
+    }
+
     public void setEstado(String estado) {
         this.estado = estado;
     }
 
     // Métodos de operación
     public void agregarDatos(String nuevosDatos) {
-        datos.append(nuevosDatos);
+        // Solo agregar si no es un paquete FIN vacío o línea vacía
+        if (nuevosDatos != null && !nuevosDatos.trim().isEmpty() &&
+                !nuevosDatos.trim().equals("FIN")) {
+            datos.append(nuevosDatos).append("\n");
+        }
     }
 
     public void incrementarSecuencia() {
         secuenciaEsperada++;
+    }
+
+    public void incrementarSecuenciaCliente() {
+        secuenciaCliente++;
+    }
+
+    // Limpiar datos duplicados y vacíos
+    public void limpiarDatos() {
+        String contenido = datos.toString();
+        String[] lineas = contenido.split("\n");
+        datos = new StringBuilder();
+        for (String linea : lineas) {
+            String lineaLimpia = linea.trim();
+            if (!lineaLimpia.isEmpty() && !lineaLimpia.equals("FIN")) {
+                datos.append(lineaLimpia).append("\n");
+            }
+        }
     }
 }

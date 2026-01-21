@@ -24,4 +24,8 @@ public class GestorSesiones {
     public static boolean existeSesion(String clave) {
         return sesiones.containsKey(clave);
     }
+
+    public static int getNumeroSesiones() {
+        return sesiones.size();
+    }
 }

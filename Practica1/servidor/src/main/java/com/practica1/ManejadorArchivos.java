@@ -1,5 +1,3 @@
-
-// ========== ManejadorArchivos.java ==========
 package com.practica1;
 
 import java.io.*;
@@ -19,9 +17,17 @@ public class ManejadorArchivos {
 
             // Guardar archivo
             Path ruta = Paths.get(Configuracion.DIRECTORIO_ARCHIVOS, nombreArchivo);
-            Files.write(ruta, sesion.getDatos().getBytes());
+            String contenido = sesion.getDatos();
+
+            if (contenido == null || contenido.trim().isEmpty()) {
+                System.out.println("[ARCHIVO] No hay datos para guardar");
+                return;
+            }
+
+            Files.write(ruta, contenido.getBytes());
 
             System.out.println("[ARCHIVO] Guardado en servidor: " + ruta);
+            System.out.println("[ARCHIVO] Tamaño: " + contenido.length() + " bytes");
 
         } catch (IOException e) {
             System.err.println("[ERROR] Guardando archivo: " + e.getMessage());
