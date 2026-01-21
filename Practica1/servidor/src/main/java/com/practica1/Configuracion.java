@@ -1,4 +1,4 @@
-package com.hector;
+package com.practica1;
 
 public class Configuracion {
     // Configuración del sistema
