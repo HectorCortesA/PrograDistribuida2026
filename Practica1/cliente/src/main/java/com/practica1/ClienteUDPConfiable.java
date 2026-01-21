@@ -21,17 +21,31 @@ public class ClienteUDPConfiable {
                 return;
             }
 
-            // Configurar conexión
+            // Configurar conexión - USAR IP DESTINO REAL
             InetAddress ipServidor = InetAddress.getByName(ipDestino);
             int puertoServidor = 5000;
 
-            // Crear socket UDP
-            DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(5000); // Timeout de 5 segundos
+            // Crear socket UDP - ESPECIFICAR PUERTO LOCAL OPCIONAL
+            DatagramSocket socket;
+            if (!ipOrigen.equals("0.0.0.0") && !ipOrigen.equals("127.0.0.1")) {
+                // Si se especifica IP origen diferente a localhost, usar esa interfaz
+                InetAddress ipLocal = InetAddress.getByName(ipOrigen);
+                socket = new DatagramSocket(0, ipLocal); // Puerto automático, interfaz específica
+                System.out.println("Usando interfaz específica: " + ipOrigen);
+            } else {
+                // Usar todas las interfaces o localhost
+                socket = new DatagramSocket();
+                System.out.println("Usando todas las interfaces disponibles");
+            }
 
-            // Obtener IP local (origen)
-            String ipLocal = InetAddress.getLocalHost().getHostAddress();
-            System.out.println("IP Local detectada: " + ipLocal);
+            socket.setSoTimeout(5000);
+
+            // Obtener IP local REAL
+            String ipLocalReal = socket.getLocalAddress().getHostAddress();
+            int puertoLocal = socket.getLocalPort();
+            System.out.println("IP Local del socket: " + ipLocalReal);
+            System.out.println("Puerto Local: " + puertoLocal);
+            System.out.println("Conectando a servidor: " + ipDestino + ":" + puertoServidor);
 
             // ===== THREE-WAY HANDSHAKE =====
             System.out.println("\n[1] Estableciendo conexión (Three-Way Handshake)...");
@@ -44,14 +58,22 @@ public class ClienteUDPConfiable {
 
             // Paso 2: Recibir SYN-ACK
             DatagramPacket respuesta = recibirPaqueteConTimeout(socket, 5000);
+            if (respuesta == null) {
+                System.err.println("ERROR: Timeout esperando SYN-ACK del servidor");
+                socket.close();
+                return;
+            }
+
             String synAck = new String(respuesta.getData(), 0, respuesta.getLength());
 
             if (!synAck.startsWith("SYN-ACK:")) {
-                System.err.println("ERROR: No se recibió SYN-ACK válido");
+                System.err.println("ERROR: No se recibió SYN-ACK válido. Recibido: " + synAck);
                 socket.close();
                 return;
             }
             System.out.println("  SYN-ACK recibido: " + synAck);
+            System.out.println("  Servidor responde desde: " + respuesta.getAddress().getHostAddress() + ":"
+                    + respuesta.getPort());
 
             // Paso 3: Enviar ACK
             String ackConexion = "ACK:" + (seqInicial + 1);
@@ -86,6 +108,11 @@ public class ClienteUDPConfiable {
 
                         // Esperar ACK
                         DatagramPacket ackPacket = recibirPaqueteConTimeout(socket, 2000);
+                        if (ackPacket == null) {
+                            System.out.println("    Timeout, reintentando...");
+                            continue;
+                        }
+
                         String ack = new String(ackPacket.getData(), 0, ackPacket.getLength());
 
                         if (ack.equals("ACK:" + numeroSecuencia)) {
@@ -95,6 +122,8 @@ public class ClienteUDPConfiable {
                         } else if (ack.startsWith("ERROR:")) {
                             System.err.println("ERROR del servidor: " + ack);
                             break;
+                        } else {
+                            System.out.println("    ACK inesperado: " + ack);
                         }
                     } catch (SocketTimeoutException e) {
                         System.out.println("    Timeout, reintentando...");
@@ -125,12 +154,16 @@ public class ClienteUDPConfiable {
             // Esperar ACK del FIN-DATA
             try {
                 DatagramPacket ackFinData = recibirPaqueteConTimeout(socket, 3000);
-                String ack = new String(ackFinData.getData(), 0, ackFinData.getLength());
-                if (ack.equals("ACK:" + numeroSecuencia)) {
-                    System.out.println("  ACK recibido para FIN-DATA");
+                if (ackFinData != null) {
+                    String ack = new String(ackFinData.getData(), 0, ackFinData.getLength());
+                    if (ack.equals("ACK:" + numeroSecuencia)) {
+                        System.out.println("  ACK recibido para FIN-DATA");
+                    }
+                } else {
+                    System.out.println("  No se recibió ACK para FIN-DATA, continuando...");
                 }
-            } catch (SocketTimeoutException e) {
-                System.out.println("  No se recibió ACK para FIN-DATA, continuando...");
+            } catch (Exception e) {
+                System.out.println("  Error esperando ACK para FIN-DATA: " + e.getMessage());
             }
 
             numeroSecuencia++;
@@ -139,7 +172,13 @@ public class ClienteUDPConfiable {
             System.out.println("\n[3] Recibiendo archivo del servidor...");
 
             // Crear nombre diferente para el archivo recibido
-            String nombreArchivoRecibido = nombreArchivo.replace(".txt", "_recibido.txt");
+            String nombreArchivoRecibido = nombreArchivo;
+            if (nombreArchivo.contains(".")) {
+                nombreArchivoRecibido = nombreArchivo.replaceFirst("\\.([^\\.]+)$", "_recibido.$1");
+            } else {
+                nombreArchivoRecibido = nombreArchivo + "_recibido";
+            }
+
             FileWriter escritor = new FileWriter(nombreArchivoRecibido);
             int lineasRecibidas = 0;
             boolean recepcionTerminada = false;
@@ -150,7 +189,8 @@ public class ClienteUDPConfiable {
                     DatagramPacket dataRx = recibirPaquete(socket);
                     String dataMsg = new String(dataRx.getData(), 0, dataRx.getLength());
 
-                    System.out.println("  Paquete recibido: " + dataMsg); // DEBUG
+                    System.out.println("  Paquete recibido del servidor: "
+                            + dataMsg.substring(0, Math.min(50, dataMsg.length())) + "...");
 
                     if (dataMsg.startsWith("DATA:")) {
                         String[] partes = dataMsg.split(":", 4);
@@ -167,8 +207,9 @@ public class ClienteUDPConfiable {
                             if (tamanio > 0 && !lineaRx.equals("FIN")) {
                                 escritor.write(lineaRx + "\n");
                                 lineasRecibidas++;
-                                System.out.println("  Línea " + lineasRecibidas + " recibida: '" + lineaRx + "'");
-                            } else if (tamanio == 0) {
+                                System.out.println("  Línea " + lineasRecibidas + " recibida: '" +
+                                        (lineaRx.length() > 30 ? lineaRx.substring(0, 30) + "..." : lineaRx) + "'");
+                            } else if (tamanio == 0 || lineaRx.equals("FIN")) {
                                 // FIN de transferencia desde servidor
                                 System.out.println("  FIN recibido del servidor, transferencia completada");
                                 recepcionTerminada = true;
@@ -181,6 +222,8 @@ public class ClienteUDPConfiable {
                         // El servidor inició el cierre
                         System.out.println("  FIN recibido, iniciando cierre...");
                         recepcionTerminada = true;
+                    } else {
+                        System.out.println("  Mensaje inesperado: " + dataMsg);
                     }
                 } catch (SocketTimeoutException e) {
                     System.out.println("INFO: Timeout esperando más datos del servidor, continuando con cierre...");
@@ -209,7 +252,7 @@ public class ClienteUDPConfiable {
                 String ackFinMsg = new String(ackFinPacket.getData(), 0, ackFinPacket.getLength());
 
                 if (!ackFinMsg.startsWith("ACK:")) {
-                    System.err.println("ERROR: No se recibió ACK válido para FIN");
+                    System.err.println("ERROR: No se recibió ACK válido para FIN. Recibido: " + ackFinMsg);
                 } else {
                     System.out.println("  ACK recibido: " + ackFinMsg);
                 }
@@ -223,7 +266,7 @@ public class ClienteUDPConfiable {
                 String finServidor = new String(finServidorPacket.getData(), 0, finServidorPacket.getLength());
 
                 if (!finServidor.startsWith("FIN:")) {
-                    System.err.println("ERROR: No se recibió FIN del servidor");
+                    System.err.println("ERROR: No se recibió FIN del servidor. Recibido: " + finServidor);
                 } else {
                     System.out.println("  FIN recibido: " + finServidor);
 
@@ -234,6 +277,8 @@ public class ClienteUDPConfiable {
                     enviarPaquete(socket, ipServidor, puertoServidor, ackFinal);
                     System.out.println("  ACK final enviado: " + ackFinal);
                 }
+            } else {
+                System.out.println("  No se recibió FIN del servidor (posible cierre unilateral)");
             }
 
             // Cerrar conexión
@@ -245,11 +290,18 @@ public class ClienteUDPConfiable {
             System.out.println("   Copia recibida y guardada: " + nombreArchivoRecibido);
             System.out.println("   Líneas recibidas de servidor: " + lineasRecibidas);
             System.out.println("   Servidor: " + ipDestino + ":5000");
+            System.out.println("   Cliente: " + ipLocalReal + ":" + puertoLocal);
 
         } catch (UnknownHostException e) {
             System.err.println("ERROR: Dirección IP no válida - " + e.getMessage());
+            System.err.println("  Asegúrate de que la IP destino '" + ipDestino + "' es correcta");
+            System.err.println("  y el servidor está ejecutándose en esa dirección.");
         } catch (SocketException e) {
             System.err.println("ERROR: Problema con el socket - " + e.getMessage());
+            System.err.println("  Posibles causas:");
+            System.err.println("  - Puerto en uso");
+            System.err.println("  - Firewall bloqueando conexión");
+            System.err.println("  - Interfaz de red no disponible");
         } catch (IOException e) {
             System.err.println("ERROR: Problema de E/S - " + e.getMessage());
             e.printStackTrace();
@@ -294,16 +346,73 @@ public class ClienteUDPConfiable {
 
     public static void main(String[] args) {
         if (args.length != 3) {
+            System.out.println("=== CLIENTE UDP CONFIABLE ===");
             System.out.println("Uso: java ClienteUDPConfiable <ip-origen> <ip-destino> <archivo>");
-            System.out.println("Ejemplo: java ClienteUDPConfiable 192.168.1.100 192.168.1.200 prueba.txt");
-            System.out.println("\nPara pruebas locales:");
-            System.out.println("  java ClienteUDPConfiable 127.0.0.1 127.0.0.1 prueba.txt");
+            System.out.println();
+            System.out.println("Argumentos:");
+            System.out.println("  <ip-origen>:    IP de la interfaz de red a usar");
+            System.out.println("                   - '0.0.0.0' para todas las interfaces");
+            System.out.println("                   - '127.0.0.1' para localhost");
+            System.out.println("                   - Ej: '192.168.1.50' para interfaz específica");
+            System.out.println();
+            System.out.println("  <ip-destino>:   IP del servidor");
+            System.out.println("                   - Ej: '192.168.1.100' para servidor en red local");
+            System.out.println("                   - Ej: '85.214.132.12' para servidor en internet");
+            System.out.println();
+            System.out.println("  <archivo>:      Nombre del archivo a transferir");
+            System.out.println("                   - Debe existir en el directorio actual");
+            System.out.println();
+            System.out.println("Ejemplos:");
+            System.out.println("  1. Cliente en misma red (todas interfaces):");
+            System.out.println("     java ClienteUDPConfiable 0.0.0.0 192.168.1.100 prueba.txt");
+            System.out.println();
+            System.out.println("  2. Cliente especificando interfaz:");
+            System.out.println("     java ClienteUDPConfiable 192.168.1.50 192.168.1.100 prueba.txt");
+            System.out.println();
+            System.out.println("  3. Cliente remoto (internet):");
+            System.out.println("     java ClienteUDPConfiable 0.0.0.0 85.214.132.12 prueba.txt");
+            System.out.println();
+            System.out.println("  4. Para pruebas locales:");
+            System.out.println("     java ClienteUDPConfiable 127.0.0.1 127.0.0.1 prueba.txt");
+            System.out.println();
+            System.out.println("NOTA: Para clientes remotos, asegúrate de:");
+            System.out.println("  - El servidor tiene puerto 5000 UDP abierto en firewall");
+            System.out.println("  - El router tiene port forwarding configurado (si aplica)");
+            System.out.println("  - El servidor está ejecutándose y escuchando en 0.0.0.0");
             return;
         }
 
         String ipOrigen = args[0];
         String ipDestino = args[1];
         String archivo = args[2];
+
+        // Mostrar información de configuración
+        System.out.println("=== CONFIGURACIÓN DEL CLIENTE ===");
+        System.out.println("IP Origen configurada: " + ipOrigen);
+        System.out.println("IP Destino: " + ipDestino);
+        System.out.println("Archivo: " + archivo);
+        System.out.println("=================================\n");
+
+        // Mostrar IPs locales disponibles
+        try {
+            System.out.println("IPs locales disponibles:");
+            java.util.Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isUp() && !iface.isLoopback()) {
+                    java.util.Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        if (addr instanceof Inet4Address) {
+                            System.out.println("  - " + iface.getDisplayName() + ": " + addr.getHostAddress());
+                        }
+                    }
+                }
+            }
+            System.out.println();
+        } catch (Exception e) {
+            System.out.println("No se pudieron obtener las interfaces de red: " + e.getMessage());
+        }
 
         transferirArchivo(ipOrigen, ipDestino, archivo);
     }
