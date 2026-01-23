@@ -31,35 +31,35 @@ public class ClienteUDPConfiable {
             long seqInicial = System.currentTimeMillis() % 10000;
             String syn = "SYN:" + nombreArchivo + ":" + seqInicial;
             enviar(socket, ipServidor, PUERTO_SERVIDOR, syn);
-            System.out.println("  → SYN (seq=" + seqInicial + ")");
+            System.out.println(" SYN (seq=" + seqInicial + ")");
 
             // SYN-ACK
-            System.out.println("  Esperando SYN-ACK...");
+            System.out.println(" Esperando SYN-ACK...");
             String synAck = recibirConTimeout(socket, 5000);
 
             if (synAck == null) {
-                System.err.println("✗ Timeout: Servidor no responde");
+                System.err.println("Timeout: Servidor no responde");
                 return;
             }
 
             if (!synAck.startsWith("SYN-ACK:")) {
                 if (synAck.startsWith("ERROR:")) {
-                    System.err.println("✗ Error servidor: " + synAck.substring(6));
+                    System.err.println("Error servidor: " + synAck.substring(6));
                 } else {
-                    System.err.println("✗ Respuesta inesperada: " + synAck);
+                    System.err.println("Respuesta inesperada: " + synAck);
                 }
                 return;
             }
 
             String[] partes = synAck.split(":");
             long seqSynAck = Long.parseLong(partes[2]);
-            System.out.println("  ← SYN-ACK (seq=" + seqSynAck + ")");
+            System.out.println(" SYN-ACK (seq=" + seqSynAck + ")");
 
             // ACK
             String ack = "ACK:" + seqSynAck;
             enviar(socket, ipServidor, PUERTO_SERVIDOR, ack);
-            System.out.println("  → ACK (ack=" + seqSynAck + ")");
-            System.out.println("✓ Conexión establecida\n");
+            System.out.println(" ACK (ack=" + seqSynAck + ")");
+            System.out.println("Conexión establecida\n");
 
             // ===== 2. RECIBIR ARCHIVO =====
             System.out.println("[2] RECIBIENDO ARCHIVO");
@@ -149,8 +149,7 @@ public class ClienteUDPConfiable {
             socket.close();
 
             // ===== RESUMEN =====
-            System.out.println("\n✅ TRANSFERENCIA COMPLETADA");
-            System.out.println("============================");
+            System.out.println("\n TRANSFERENCIA COMPLETADA");
             System.out.println("Archivo: " + nombreArchivo);
             System.out.println("Guardado como: " + nombreLocal);
             System.out.println("Líneas: " + lineasRecibidas);
@@ -197,7 +196,7 @@ public class ClienteUDPConfiable {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("=== CLIENTE UDP CONFIABLE ===");
+        System.out.println("CLIENTE UDP CONFIABLE");
         System.out.println("Solicita archivos de un servidor");
         System.out.println("Puerto servidor: 22000\n");
 
