@@ -53,7 +53,7 @@ public class ServidorUDPConfiable {
         try (DatagramSocket socket = new DatagramSocket(PUERTO)) {
             socket.setSoTimeout(1000);
 
-            System.out.println("✓ Servidor iniciado en puerto " + PUERTO);
+            System.out.println("Servidor iniciado en puerto " + PUERTO);
             System.out.println("Esperando conexiones...\n");
             escribirLog("Servidor escuchando en puerto " + PUERTO);
 
@@ -337,3 +337,5 @@ public class ServidorUDPConfiable {
         }
     }
 }
+
+// secuencia de numeros , cambio de numero del protocolo
