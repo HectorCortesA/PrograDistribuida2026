@@ -23,4 +23,10 @@ public class Configuracion {
     public static final String TIPO_FIN = "FIN";
     public static final String TIPO_ERROR = "ERROR";
     public static final String TIPO_LISTA = "LISTA";
+    public static final String TIPO_PUBKEY = "PUBKEY";
+
+    // Configuración RSA
+    public static final int TAMAÑO_CLAVE_RSA = 2048;
+    public static final String ALGORITMO_RSA = "RSA/ECB/PKCS1Padding";
+    public static final String PROVEEDOR_CRIPTOGRAFIA = "RSA";
 }

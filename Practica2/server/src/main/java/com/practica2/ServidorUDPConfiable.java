@@ -2,281 +2,201 @@ package com.practica2;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.*;
 import java.util.*;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
-import java.security.PrivateKey;
 import java.util.Base64;
 import javax.crypto.Cipher;
 
 public class ServidorUDPConfiable {
 
-    private static class EstadoConexion {
+    static class ClienteConexion {
         String ip;
         int puerto;
-        String estado;
-        PublicKey publicaCliente;
-        long secuencia;
-        long ackEsperado;
-
-        EstadoConexion(String ip, int puerto) {
-            this.ip = ip;
-            this.puerto = puerto;
-            this.estado = Configuracion.ESTADO_SYN_RECIBIDO;
-            this.secuencia = System.currentTimeMillis() % 10000;
-            this.ackEsperado = 0;
-        }
+        String nombreArchivo;
+        PublicKey clavePublicaCliente;
+        boolean listo = false;
     }
 
-    private static KeyPair parClaves;
-    private static Map<String, EstadoConexion> conexiones = new HashMap<>();
+    private static KeyPair parClavesServidor;
+    private static DatagramSocket socketServidor;
+    private static Map<String, ClienteConexion> clientes = new HashMap<>();
 
-    public static void iniciarServidor() {
-        System.out.println("=== SERVIDOR UDP CONFIABLE CON CIFRADO RSA ===");
-        System.out.println("Puerto: " + Configuracion.PUERTO_SERVIDOR);
-        System.out.println("Directorio base: " + Configuracion.DIRECTORIO_BASE);
-        System.out.println();
+    public static void main(String[] args) throws Exception {
+        System.out.println("  SERVIDOR UDP - CIFRADO RSA TLS ");
 
         // Generar claves RSA del servidor
-        try {
-            generarClaves();
-        } catch (Exception e) {
-            System.err.println("Error al generar claves: " + e.getMessage());
-            return;
-        }
+        System.out.println("Generando claves RSA 2048 bits...");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        parClavesServidor = kpg.generateKeyPair();
+        System.out.println("Claves generadas\n");
 
-        DatagramSocket socket = null;
-        try {
-            socket = new DatagramSocket(Configuracion.PUERTO_SERVIDOR);
-            System.out.println("✓ Servidor iniciado y esperando conexiones...\n");
+        // Iniciar servidor UDP
+        socketServidor = new DatagramSocket(Configuracion.PUERTO_SERVIDOR);
+        System.out.println(" Escuchando en puerto " + Configuracion.PUERTO_SERVIDOR + "\n");
 
-            while (true) {
-                byte[] buffer = new byte[65507];
+        byte[] buffer = new byte[65507];
+
+        while (true) {
+            try {
                 DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
-                socket.receive(paquete);
+                socketServidor.receive(paquete);
 
-                String ipCliente = paquete.getAddress().getHostAddress();
-                int puertoCliente = paquete.getPort();
-                String mensaje = new String(paquete.getData(), 0, paquete.getLength());
+                String ip = paquete.getAddress().getHostAddress();
+                int puerto = paquete.getPort();
+                String mensaje = new String(paquete.getData(), 0, paquete.getLength()).trim();
 
-                System.out.println("[" + ipCliente + ":" + puertoCliente + "] → " +
-                        (mensaje.length() > 50 ? mensaje.substring(0, 50) + "..." : mensaje));
+                String preview = mensaje.length() > 60 ? mensaje.substring(0, 60) + "..." : mensaje;
+                System.out.println("[" + ip + ":" + puerto + "] RX: " + preview);
 
-                procesarMensaje(socket, ipCliente, puertoCliente, mensaje);
-            }
+                procesarMensaje(ip, puerto, mensaje);
 
-        } catch (Exception e) {
-            System.err.println("✗ Error del servidor: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (socket != null && !socket.isClosed()) {
-                socket.close();
+            } catch (Exception e) {
+                System.err.println("[ERROR] " + e.getMessage());
             }
         }
     }
 
-    private static void procesarMensaje(DatagramSocket socket, String ipCliente,
-            int puertoCliente, String mensaje) {
+    private static void procesarMensaje(String ip, int puerto, String mensaje) throws Exception {
+        String clave = ip + ":" + puerto;
+
+        if (mensaje.startsWith("SYN:")) {
+            String[] partes = mensaje.split(":");
+            String archivo = partes[1];
+
+            System.out.println("  [SYN] Archivo: " + archivo);
+
+            // Verificar archivo
+            File f = new File(Configuracion.DIRECTORIO_BASE, archivo);
+            if (!f.exists()) {
+                System.err.println("  [ERROR] No existe: " + f.getAbsolutePath());
+                enviar(ip, puerto, "ERROR:Archivo no encontrado");
+                return;
+            }
+
+            System.out.println("  [OK] Encontrado: " + f.length() + " bytes");
+
+            // Guardar cliente
+            ClienteConexion cliente = new ClienteConexion();
+            cliente.ip = ip;
+            cliente.puerto = puerto;
+            cliente.nombreArchivo = archivo;
+            clientes.put(clave, cliente);
+
+            // Enviar SYN-ACK
+            String claveB64 = Base64.getEncoder().encodeToString(
+                    parClavesServidor.getPublic().getEncoded());
+            String respuesta = "SYN-ACK:" + (System.currentTimeMillis() % 10000) + ":" + claveB64;
+            enviar(ip, puerto, respuesta);
+            System.out.println("  [TX] SYN-ACK enviado\n");
+
+        } else if (mensaje.startsWith("ACK:")) {
+            System.out.println("  [ACK] Confirmación\n");
+
+        } else if (mensaje.startsWith("PUBKEY:")) {
+            System.out.println("  [PUBKEY] Clave pública del cliente");
+
+            ClienteConexion cliente = clientes.get(clave);
+            if (cliente == null) {
+                System.err.println("  [ERROR] Cliente no encontrado");
+                return;
+            }
+
+            try {
+                // Extraer clave
+                String[] partes = mensaje.split(":", 2);
+                String claveB64 = partes[1];
+
+                System.out.println("  [DEBUG] Clave Base64 length: " + claveB64.length());
+
+                // Decodificar
+                byte[] claveDecodificada = Base64.getDecoder().decode(claveB64);
+                System.out.println("  [DEBUG] Clave decodificada: " + claveDecodificada.length + " bytes");
+
+                // Reconstruir
+                java.security.spec.X509EncodedKeySpec spec = new java.security.spec.X509EncodedKeySpec(
+                        claveDecodificada);
+                cliente.clavePublicaCliente = java.security.KeyFactory.getInstance("RSA").generatePublic(spec);
+
+                cliente.listo = true;
+                System.out.println("  [OK] Clave guardada - Iniciando cifrado\n");
+
+                // Enviar archivo AHORA
+                enviarArchivo(cliente);
+
+            } catch (Exception e) {
+                System.err.println("  [ERROR] " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void enviarArchivo(ClienteConexion cliente) {
+        System.out.println("[TRANSFER] Enviando: " + cliente.nombreArchivo);
+
         try {
-            String clave = ipCliente + ":" + puertoCliente;
-            EstadoConexion estado = conexiones.getOrDefault(clave, new EstadoConexion(ipCliente, puertoCliente));
-
-            if (mensaje.startsWith("SYN:")) {
-                procesarSYN(socket, ipCliente, puertoCliente, mensaje, estado);
-                conexiones.put(clave, estado);
-
-            } else if (mensaje.startsWith("ACK:")) {
-                procesarACK(socket, ipCliente, puertoCliente, mensaje, estado);
-
-            } else if (mensaje.startsWith("FIN:")) {
-                procesarFIN(socket, ipCliente, puertoCliente, mensaje, estado);
-                conexiones.remove(clave);
-
-            } else if (mensaje.startsWith("PUBKEY:")) {
-                procesarPublicKey(mensaje, estado);
-
-            } else {
-                System.out.println(
-                        "[" + ipCliente + ":" + puertoCliente + "] Mensaje desconocido: " + mensaje.substring(0, 30));
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error procesando mensaje: " + e.getMessage());
-        }
-    }
-
-    private static void procesarSYN(DatagramSocket socket, String ipCliente, int puertoCliente,
-            String mensaje, EstadoConexion estado) throws Exception {
-        String[] partes = mensaje.split(":");
-        String nombreArchivo = partes[1];
-        long seqCliente = Long.parseLong(partes[2]);
-
-        System.out.println("  [SYN] Solicitando: " + nombreArchivo + " (seq=" + seqCliente + ")");
-
-        // Verificar que el archivo existe
-        File archivo = new File(Configuracion.DIRECTORIO_BASE, nombreArchivo);
-        if (!archivo.exists()) {
-            String error = "ERROR:Archivo no encontrado";
-            enviar(socket, ipCliente, puertoCliente, error);
-            System.out.println("  [ERROR] Archivo no existe");
-            return;
-        }
-
-        // Responder con SYN-ACK
-        estado.ackEsperado = seqCliente + 1;
-        estado.estado = Configuracion.ESTADO_SYN_RECIBIDO;
-        String synAck = "SYN-ACK:PUBKEY:" + estado.secuencia + ":"
-                + Base64.getEncoder().encodeToString(parClaves.getPublic().getEncoded());
-
-        enviar(socket, ipCliente, puertoCliente, synAck);
-        System.out.println("  [SYN-ACK] Enviando clave pública (seq=" + estado.secuencia + ")");
-    }
-
-    private static void procesarPublicKey(String mensaje, EstadoConexion estado) {
-        try {
-            String[] partes = mensaje.split(":", 2);
-            String claveBase64 = partes[1];
-            // Aquí se guardaría la clave pública del cliente si es necesaria
-            System.out.println("  [PUBKEY] Clave pública del cliente recibida");
-        } catch (Exception e) {
-            System.err.println("Error procesando clave pública: " + e.getMessage());
-        }
-    }
-
-    private static void procesarACK(DatagramSocket socket, String ipCliente, int puertoCliente,
-            String mensaje, EstadoConexion estado) throws Exception {
-        String[] partes = mensaje.split(":");
-        long ack = Long.parseLong(partes[1]);
-
-        if (ack == estado.ackEsperado) {
-            estado.estado = Configuracion.ESTADO_ESTABLISHED;
-            System.out.println("  [ACK] Conexión establecida");
-
-            // Iniciar transferencia de archivo
-            transferirArchivo(socket, ipCliente, puertoCliente, estado);
-        }
-    }
-
-    private static void transferirArchivo(DatagramSocket socket, String ipCliente,
-            int puertoCliente, EstadoConexion estado) throws Exception {
-        System.out.println("\n[2] TRANSFIRIENDO ARCHIVO CIFRADO");
-
-        // Obtener nombre del archivo del mensaje original (se asume que está guardado)
-        // Para este ejemplo, usaremos un archivo de prueba
-        File archivo = new File(Configuracion.DIRECTORIO_BASE);
-        File[] archivos = archivo.listFiles();
-        if (archivos == null || archivos.length == 0) {
-            System.out.println("  No hay archivos en " + Configuracion.DIRECTORIO_BASE);
-            return;
-        }
-
-        File archivoEnvio = archivos[0]; // Primer archivo
-
-        try (BufferedReader lector = new BufferedReader(new FileReader(archivoEnvio))) {
-            estado.estado = Configuracion.ESTADO_ENVIANDO;
-            long secuencia = estado.secuencia + 1;
+            File archivo = new File(Configuracion.DIRECTORIO_BASE, cliente.nombreArchivo);
+            BufferedReader reader = new BufferedReader(new FileReader(archivo));
             String linea;
             int numLinea = 0;
+            long seq = 1000;
 
-            while ((linea = lector.readLine()) != null) {
+            while ((linea = reader.readLine()) != null) {
                 numLinea++;
 
-                // Cifrar línea con la clave pública del cliente (usamos nuestra clave para
-                // demo)
-                String lineaCifrada = cifrarConRSA(linea, parClaves.getPublic());
+                System.out.println("  [LÍNEA " + numLinea + "] Original: " +
+                        (linea.length() > 40 ? linea.substring(0, 40) + "..." : linea));
 
-                // Crear paquete DATA
-                int tamaño = linea.length();
-                String paquete = "DATA:" + secuencia + ":" + tamaño + ":" + lineaCifrada;
+                // CIFRAR con clave pública del cliente
+                System.out.println("  [DEBUG] Cifrando con clave del cliente...");
+                String lineaCifrada = cifrar(linea, cliente.clavePublicaCliente);
+                System.out.println("  [DEBUG] Cifrado: " + lineaCifrada.substring(0, 50) + "...");
 
-                enviar(socket, ipCliente, puertoCliente, paquete);
-                System.out.println("  [DATA] Línea " + numLinea + " cifrada (seq=" + secuencia +
-                        ", tamaño original=" + tamaño + ")");
+                // Enviar
+                String paqueteDATA = "DATA:" + seq + ":" + linea.length() + ":" + lineaCifrada;
+                enviar(cliente.ip, cliente.puerto, paqueteDATA);
 
-                // Esperar ACK
-                socket.setSoTimeout(Configuracion.TIMEOUT_RECEPCION);
-                try {
-                    byte[] buffer = new byte[65507];
-                    DatagramPacket respuesta = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(respuesta);
-                    String ackMsg = new String(respuesta.getData(), 0, respuesta.getLength());
+                System.out.println("  [TX] DATA enviado (" + lineaCifrada.length() + " bytes)\n");
 
-                    if (ackMsg.startsWith("ACK:")) {
-                        System.out.println("  [ACK] Línea " + numLinea + " confirmada");
-                    }
-                } catch (SocketTimeoutException e) {
-                    System.out.println("  ⏱ Timeout esperando ACK para línea " + numLinea);
-                }
-
-                secuencia++;
+                seq++;
+                Thread.sleep(150);
             }
+            reader.close();
 
-            // Enviar FIN-DATA
-            String finData = "DATA:" + secuencia + ":0:FIN-DATA";
-            enviar(socket, ipCliente, puertoCliente, finData);
-            System.out.println("\n  [FIN-DATA] Transferencia completada (" + numLinea + " líneas)");
-
-            estado.estado = Configuracion.ESTADO_TRANSFER_COMPLETE;
+            // Enviar FIN
+            String paqueteFIN = "DATA:" + seq + ":0:FIN";
+            enviar(cliente.ip, cliente.puerto, paqueteFIN);
+            System.out.println("[FIN] Completado (" + numLinea + " líneas)\n");
 
         } catch (Exception e) {
-            System.err.println("Error transfiriendo archivo: " + e.getMessage());
+            System.err.println("[ERROR] " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private static void procesarFIN(DatagramSocket socket, String ipCliente, int puertoCliente,
-            String mensaje, EstadoConexion estado) throws Exception {
-        System.out.println("\n[3] CERRANDO CONEXIÓN");
+    private static String cifrar(String texto, PublicKey clave) throws Exception {
+        System.out.println("    [RSA] Iniciando cifrado...");
+        System.out.println("    [RSA] Texto: " + texto.length() + " chars");
+        System.out.println("    [RSA] Clave pública: " + (clave != null ? "OK" : "NULL"));
 
-        // Responder con ACK
-        String[] partes = mensaje.split(":");
-        long seqFin = Long.parseLong(partes[1]);
-        String ack = "ACK:" + seqFin;
-
-        enviar(socket, ipCliente, puertoCliente, ack);
-        System.out.println("  [ACK] Conexión cerrada correctamente\n");
-
-        estado.estado = "CLOSED";
-    }
-
-    // ===== CRIPTOGRAFÍA RSA =====
-
-    private static void generarClaves() throws Exception {
-        System.out.println("Generando claves RSA (2048 bits)...");
-        KeyPairGenerator generador = KeyPairGenerator.getInstance("RSA");
-        generador.initialize(2048);
-        parClaves = generador.generateKeyPair();
-        System.out.println("✓ Claves RSA generadas\n");
-    }
-
-    private static String cifrarConRSA(String texto, PublicKey publicKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        cipher.init(Cipher.ENCRYPT_MODE, clave);
 
-        byte[] textoCifrado = cipher.doFinal(texto.getBytes());
-        return Base64.getEncoder().encodeToString(textoCifrado);
+        byte[] cifrado = cipher.doFinal(texto.getBytes());
+        System.out.println("    [RSA] Cifrado: " + cifrado.length + " bytes");
+
+        String resultado = Base64.getEncoder().encodeToString(cifrado);
+        System.out.println("    [RSA] Base64: " + resultado.length() + " chars");
+
+        return resultado;
     }
 
-    private static String descifrarConRSA(String textoCifrado, PrivateKey privateKey) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-
-        byte[] texto = Base64.getDecoder().decode(textoCifrado);
-        byte[] textoDescifrado = cipher.doFinal(texto);
-        return new String(textoDescifrado);
-    }
-
-    // ===== MÉTODOS AUXILIARES =====
-
-    private static void enviar(DatagramSocket socket, String ip, int puerto, String mensaje) throws IOException {
-        byte[] buffer = mensaje.getBytes();
-        DatagramPacket paquete = new DatagramPacket(buffer, buffer.length,
-                InetAddress.getByName(ip), puerto);
-        socket.send(paquete);
-    }
-
-    public static void main(String[] args) {
-        iniciarServidor();
+    private static void enviar(String ip, int puerto, String mensaje) throws Exception {
+        byte[] datos = mensaje.getBytes();
+        DatagramPacket paquete = new DatagramPacket(
+                datos, datos.length, InetAddress.getByName(ip), puerto);
+        socketServidor.send(paquete);
     }
 }
