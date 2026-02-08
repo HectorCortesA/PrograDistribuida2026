@@ -14,6 +14,7 @@ public class ClienteUDPConfiable {
 
     private static DatagramSocket socket;
 
+    // cliente
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
@@ -113,9 +114,8 @@ public class ClienteUDPConfiable {
                         writerCifrado.flush();
 
                         try {
-                            System.out.println("  Descifrando...");
                             String lineaDescifrada = descifrar(contenidoCifrado, clavePrivadaCliente);
-                            System.out.println("  ✓ Descifrada: " + lineaDescifrada + "\n");
+                            System.out.println("  ✓ Descifrada: " + lineaDescifrada);
 
                             writerDescifrado.write(lineaDescifrada + "\n");
                             writerDescifrado.flush();
@@ -156,23 +156,12 @@ public class ClienteUDPConfiable {
     }
 
     private static String descifrar(String textoCifrado, PrivateKey clave) throws Exception {
-        System.out.println("    [RSA] Descifrando...");
-        System.out.println("    [RSA] Entrada: " + textoCifrado.length() + " chars");
-        System.out.println("    [RSA] Clave privada: " + (clave != null ? "OK" : "NULL"));
-
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, clave);
 
         byte[] decodificado = Base64.getDecoder().decode(textoCifrado);
-        System.out.println("    [RSA] Decodificado: " + decodificado.length + " bytes");
-
         byte[] descifrado = cipher.doFinal(decodificado);
-        System.out.println("    [RSA] Descifrado: " + descifrado.length + " bytes");
-
-        String resultado = new String(descifrado);
-        System.out.println("    [RSA] Resultado: " + resultado);
-
-        return resultado;
+        return new String(descifrado);
     }
 
     private static void enviar(InetAddress ip, int puerto, String mensaje) throws Exception {
