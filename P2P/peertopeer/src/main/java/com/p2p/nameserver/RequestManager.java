@@ -44,29 +44,23 @@ public class RequestManager {
         PendingRequest request = pendingRequests.remove(requestId);
 
         if (request != null) {
-            boolean authoritative = (boolean) message.getPayload("authoritative");
             String filename = (String) message.getPayload("filename");
             String owner = (String) message.getPayload("owner");
 
             logRegistry.info("RequestManager", "Respuesta recibida para " + filename +
-                    " [Autoritativa: " + authoritative + "]");
+                    " de " + owner);
 
-            if (authoritative) {
-                // Actualizar caché local
-                long timestamp = (long) message.getPayload("timestamp");
-                NameServer.FileInfo info = new NameServer.FileInfo(filename, owner, timestamp);
-                nameServer.getLocalCache().put(filename, info);
-
-                // Reenviar respuesta al solicitante original
-                try {
-                    TCPNetworkModule.PeerConnection originalSource = request.getSource();
-                    if (originalSource != null && originalSource.isConnected()) {
-                        originalSource.getOos().writeObject(message);
-                        originalSource.getOos().flush();
-                    }
-                } catch (Exception e) {
-                    logRegistry.error("RequestManager", "Error reenviando respuesta: " + e.getMessage());
+            // Reenviar respuesta al solicitante original
+            try {
+                TCPNetworkModule.PeerConnection originalSource = request.getSource();
+                if (originalSource != null && originalSource.isConnected()) {
+                    originalSource.getOos().writeObject(message);
+                    originalSource.getOos().flush();
+                    logRegistry.info("RequestManager", "Respuesta reenviada a " +
+                            originalSource.getPeerId());
                 }
+            } catch (Exception e) {
+                logRegistry.error("RequestManager", "Error reenviando respuesta: " + e.getMessage());
             }
         }
     }
@@ -79,7 +73,7 @@ public class RequestManager {
 
             // Enviar NACK al solicitante
             try {
-                Message nack = new Message(MessageType.NACK_RESPONSE, nameServer.getNetworkModule().getNodeId());
+                Message nack = new Message(MessageType.NACK_RESPONSE, "localhost");
                 nack.addPayload("filename", request.getFilename());
                 nack.addPayload("requestId", requestId);
                 nack.addPayload("reason", "Timeout - No se encontró el archivo en la red");
@@ -88,6 +82,7 @@ public class RequestManager {
                 if (source != null && source.isConnected()) {
                     source.getOos().writeObject(nack);
                     source.getOos().flush();
+                    logRegistry.info("RequestManager", "NACK enviado a " + source.getPeerId());
                 }
             } catch (Exception e) {
                 logRegistry.error("RequestManager", "Error enviando NACK: " + e.getMessage());

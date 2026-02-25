@@ -5,93 +5,55 @@ import com.p2p.nameserver.NameServer;
 import com.p2p.network.TCPNetworkModule;
 import com.p2p.utils.ThreadManager;
 import com.p2p.shared.SharedList;
-import com.p2p.metadata.MetadataStore;
-import com.p2p.cache.LocalCache;
-import com.p2p.conflict.ConflictRegistry;
-import com.p2p.monitor.TTLMonitor;
-import com.p2p.monitor.Synchronizer;
-import com.p2p.consensus.ConsensusManager;
-import com.p2p.shared.ActiveCopies;
 import com.p2p.shared.LogRegistry;
 
 import javax.swing.*;
+import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println("=====================================");
+        System.out.println("Iniciando Nodo P2P File Sharing...");
+        System.out.println("=====================================");
 
-        System.out.println("Iniciando Nodo P2P Archivo Compartido...");
+        // Crear directorios
+        new File("shared").mkdirs();
+        new File("local").mkdirs();
 
-        // Cada nodo tiene TODOS los componentes (Peer puro)
+        // Componentes
         ThreadManager threadManager = new ThreadManager();
-
-        // Módulo de red: ESCUCHA (servidor) y CONECTA (cliente)
         TCPNetworkModule networkModule = new TCPNetworkModule(threadManager);
-
-        // Componentes locales de este nodo
         SharedList sharedList = new SharedList();
-        MetadataStore metadataStore = new MetadataStore();
-        LocalCache localCache = new LocalCache();
-        ConflictRegistry conflictRegistry = new ConflictRegistry();
-        ActiveCopies activeCopies = new ActiveCopies();
         LogRegistry logRegistry = new LogRegistry();
 
-        // Servidor de nombres local
-        NameServer nameServer = new NameServer(networkModule, sharedList, metadataStore,
-                localCache, conflictRegistry, logRegistry);
-
-        // Monitores y sincronizadores
-        TTLMonitor ttlMonitor = new TTLMonitor(localCache, metadataStore, threadManager);
-        Synchronizer synchronizer = new Synchronizer(metadataStore, conflictRegistry,
-                activeCopies, networkModule, threadManager);
-        ConsensusManager consensusManager = new ConsensusManager(networkModule, metadataStore,
-                sharedList, logRegistry);
-
-        // Registrar listeners
-        networkModule.addListener(nameServer);
-        networkModule.addListener(consensusManager);
-
-        // Iniciar el módulo de red (empieza a escuchar como servidor)
-        networkModule.start();
-        System.out.println("✓ Nodo escuchando como servidor en puerto 8888");
-
-        // Cargar archivos compartidos locales
+        // Cargar archivos locales
         sharedList.loadFromDirectory();
-        metadataStore.discoverFiles();
-        System.out.println("✓ Archivos locales cargados: " + sharedList.getSharedFiles().size());
+        System.out.println("📋 Archivos locales: " + sharedList.getSharedFiles());
 
-        // Conectar a otros peers (actuar como cliente)
+        // Pasar SharedList al módulo de red
+        networkModule.setSharedList(sharedList);
+
+        // NameServer
+        NameServer nameServer = new NameServer(networkModule, sharedList, logRegistry);
+        networkModule.addListener(nameServer);
+
+        // Iniciar red
+        networkModule.start();
+
+        // Conectar a peers
         if (args.length > 0) {
-            System.out.println("→ Actuando como cliente: Conectando a otros peers...");
-            for (String peerAddress : args) {
-                networkModule.connectToPeer(peerAddress);
+            for (String peer : args) {
+                networkModule.connectToPeer(peer);
             }
         }
 
-        // Descubrir peers automáticamente
-        networkModule.discoverLocalPeers();
-
-        // Iniciar monitores
-        ttlMonitor.start();
-        synchronizer.start();
-
-        // Iniciar GUI
+        // GUI
         SwingUtilities.invokeLater(() -> {
-            ClientGUI clientGUI = new ClientGUI(nameServer, networkModule, sharedList,
-                    metadataStore, logRegistry);
+            ClientGUI clientGUI = new ClientGUI(nameServer, networkModule, sharedList, logRegistry);
             clientGUI.setVisible(true);
         });
 
-        System.out.println("Nodo P2P completamente inicializado");
-
-        // Hook para shutdown graceful
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println(" Nodo saliendo de la red P2P...");
-            ttlMonitor.stop();
-            synchronizer.stop();
-            networkModule.shutdown();
-            threadManager.shutdown();
-            logRegistry.close();
-            System.out.println("Nodo desconectado correctamente");
-        }));
+        System.out.println("✅ Nodo listo: " + networkModule.getNodeId());
+        System.out.println("=====================================");
     }
 }

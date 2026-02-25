@@ -32,3 +32,198 @@
 [2026-02-25 08:02:16.702] INFO    TTLMonitor     : Monitor TTL detenido
 [2026-02-25 08:02:16.703] INFO    Synchronizer   : Sincronizador detenido
 [2026-02-25 08:02:16.704] INFO    System         : Sistema de logs detenido
+[2026-02-25 13:46:17.660] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:46:17.662] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:46:17.662] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:46:17.663] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:46:17.663] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:46:17.694] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 13:46:17.694] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 13:46:47.698] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:47:17.698] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:47:47.698] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:48:17.698] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:48:20.727] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 13:48:20.727] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 13:48:20.727] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 13:48:20.727] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 13:48:20.747] INFO    GUI            : Conectando a peer: 172.26.165.53
+[2026-02-25 13:48:30.736] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.736] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.737] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.737] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.738] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.738] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.738] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:30.738] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 13:48:47.696] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:49:17.693] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:49:47.733] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:50:17.740] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:50:47.743] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:51:10.194] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 13:51:10.195] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 13:51:17.743] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:51:44.674] INFO    GUI            : Archivo compartido: Menu.code-workspace
+[2026-02-25 13:51:47.743] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:52:17.742] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:52:25.478] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 13:52:25.479] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 13:52:25.480] INFO    GUI            : Conectando a peer: 172.31.10.158
+[2026-02-25 13:52:32.041] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:32.041] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:32.042] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:32.042] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:37.899] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:37.900] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:37.900] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:37.900] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 13:52:47.743] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:53:17.739] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:53:24.450] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 13:53:24.450] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 13:53:24.453] INFO    System         : Sistema de logs detenido
+[2026-02-25 13:53:54.619] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:53:54.620] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:53:54.621] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:53:54.621] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:53:54.621] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.810] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.811] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.812] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.812] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.812] INFO    System         : Sistema de logs iniciado
+[2026-02-25 13:54:25.834] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 13:54:25.835] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 13:54:55.838] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:55:25.835] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:55:55.838] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:56:17.130] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:40000
+[2026-02-25 13:56:17.131] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:40000
+[2026-02-25 13:56:25.836] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:56:43.559] INFO    GUI            : Archivo compartido: p2p_activity.log
+[2026-02-25 13:56:55.838] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:57:11.110] INFO    NameServer     : Peer 192.168.102.1:40000 comparte 1 archivos
+[2026-02-25 13:57:11.111] INFO    NameServer     : Peer 192.168.102.1:40000 comparte 1 archivos
+[2026-02-25 13:57:25.837] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:57:51.359] INFO    GUI            : Iniciando descarga de: prueba2_CIFRADO.txt
+[2026-02-25 13:57:55.837] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:58:25.837] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:58:55.837] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:59:25.480] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:40000
+[2026-02-25 13:59:25.480] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:40000
+[2026-02-25 13:59:25.482] INFO    GUI            : Conectando a peer: 172.31.10.158
+[2026-02-25 13:59:25.836] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 13:59:30.953] INFO    NameServer     : Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:30.954] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:30.955] INFO    NameServer     : Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:30.955] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:36.388] INFO    NameServer     : Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:36.388] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:36.389] INFO    NameServer     : Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:36.389] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:40000
+[2026-02-25 13:59:55.834] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:00:25.836] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:00:55.837] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:01:25.836] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:01:55.833] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:02:25.834] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:02:42.317] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 14:02:42.318] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 14:02:42.323] INFO    System         : Sistema de logs detenido
+[2026-02-25 14:05:08.580] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:05:08.584] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:05:08.586] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:05:08.586] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:05:08.590] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:05:08.619] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 14:05:08.620] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 14:05:38.624] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:06:08.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:06:38.620] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:07:08.620] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:07:38.623] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:08:08.619] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:08:38.055] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:08:38.623] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:08:52.968] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:08:53.737] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:08:54.320] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:09:06.795] INFO    GUI            : ✅ Archivo compartido: prueba2_CIFRADO.txt
+[2026-02-25 14:09:06.828] INFO    GUI            : 📢 Anunciando 4 archivos compartidos a la red: [p2p_activity.log, Menu.code-workspace, prueba2_CIFRADO.txt, Practica 1.pdf]
+[2026-02-25 14:09:08.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:09:38.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:10:08.620] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:10:09.800] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 14:10:09.801] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 14:10:09.803] INFO    NameServer     : Recibido PEER_ANNOUNCE de 192.168.102.1:8888
+[2026-02-25 14:10:09.804] INFO    NameServer     : Archivo remoto: .project en peer 192.168.102.1:8888
+[2026-02-25 14:10:09.807] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos: [.project]
+[2026-02-25 14:10:09.808] INFO    NameServer     : Recibido PEER_ANNOUNCE de 192.168.102.1:8888
+[2026-02-25 14:10:09.808] INFO    NameServer     : Archivo remoto: .project en peer 192.168.102.1:8888
+[2026-02-25 14:10:09.808] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos: [.project]
+[2026-02-25 14:10:38.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:10:42.373] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:11:08.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:11:38.622] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:12:02.611] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 14:12:02.611] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 14:12:02.614] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 14:12:02.614] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 14:12:02.615] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 14:12:02.615] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 14:12:02.615] INFO    System         : Sistema de logs detenido
+[2026-02-25 14:14:56.048] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:14:56.050] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:14:56.050] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:14:56.050] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:14:56.051] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:14:56.074] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 14:14:56.074] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 14:14:59.568] INFO    GUI            : Lista actualizada manualmente
+[2026-02-25 14:15:26.075] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:15:33.327] INFO    GUI            : Conectando a peer: 192.168.102.1:8888+
+[2026-02-25 14:15:43.260] INFO    GUI            : Conectando a peer: 192.168.102.1:8888
+[2026-02-25 14:15:56.078] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:16:26.075] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:16:43.031] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 14:16:43.032] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 14:16:43.035] INFO    System         : Sistema de logs detenido
+[2026-02-25 14:16:45.428] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:16:45.430] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:16:45.431] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:16:45.431] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:16:45.431] INFO    System         : Sistema de logs iniciado
+[2026-02-25 14:16:45.454] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 14:16:45.455] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 14:17:00.792] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 14:17:00.792] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 14:17:00.792] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 14:17:00.792] INFO    NameServer     : Nuevo peer conectado: 127.0.0.1:8888
+[2026-02-25 14:17:00.794] INFO    NameServer     : Recibido PEER_ANNOUNCE de 127.0.0.1:8888
+[2026-02-25 14:17:00.794] INFO    NameServer     : Archivo remoto: p2p_activity.log en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.795] INFO    NameServer     : Archivo remoto: Menu.code-workspace en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.795] INFO    NameServer     : Archivo remoto: prueba2_CIFRADO.txt en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.795] INFO    NameServer     : Archivo remoto: Practica 1.pdf en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.798] INFO    NameServer     : Peer 127.0.0.1:8888 comparte 4 archivos: [p2p_activity.log, Menu.code-workspace, prueba2_CIFRADO.txt, Practica 1.pdf]
+[2026-02-25 14:17:00.798] INFO    NameServer     : Recibido PEER_ANNOUNCE de 127.0.0.1:8888
+[2026-02-25 14:17:00.798] INFO    NameServer     : Archivo remoto: p2p_activity.log en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.798] INFO    NameServer     : Archivo remoto: Menu.code-workspace en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.798] INFO    NameServer     : Archivo remoto: prueba2_CIFRADO.txt en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.799] INFO    NameServer     : Archivo remoto: Practica 1.pdf en peer 127.0.0.1:8888
+[2026-02-25 14:17:00.799] INFO    NameServer     : Peer 127.0.0.1:8888 comparte 4 archivos: [p2p_activity.log, Menu.code-workspace, prueba2_CIFRADO.txt, Practica 1.pdf]
+[2026-02-25 14:17:00.811] INFO    GUI            : Conectando a peer: 172.26.165.53
+[2026-02-25 14:17:10.806] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.806] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.808] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.808] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.809] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.809] INFO    NameServer     : Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.809] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:10.809] INFO    ConsensusManager: Peer desconectado: 127.0.0.1:8888
+[2026-02-25 14:17:15.456] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:17:45.456] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:18:15.456] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 14:18:31.195] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 14:18:31.196] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 14:18:31.199] INFO    System         : Sistema de logs detenido

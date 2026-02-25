@@ -1,6 +1,7 @@
 package com.p2p.network;
 
 import com.p2p.utils.ThreadManager;
+import com.p2p.shared.SharedList;
 
 import java.io.*;
 import java.net.*;
@@ -16,17 +17,11 @@ public class TCPNetworkModule {
     private final String nodeId;
     private final Map<String, PeerConnection> peers;
     private final List<MessageListener> listeners;
-    private final Map<String, ConnectionState> connectionStates;
+    private SharedList sharedList;
 
     private ServerSocket serverSocket;
     private boolean running;
 
-    public enum ConnectionState {
-        CLOSED, LISTEN, SYN_SENT, SYN_RECEIVED, ESTABLISHED,
-        FIN_WAIT_1, FIN_WAIT_2, TIME_WAIT, CLOSE_WAIT, LAST_ACK
-    }
-
-    // Interfaz pública para listeners
     public interface MessageListener {
         void onMessage(Message message, PeerConnection source);
 
@@ -42,8 +37,11 @@ public class TCPNetworkModule {
         this.nodeId = generateNodeId();
         this.peers = new ConcurrentHashMap<>();
         this.listeners = new ArrayList<>();
-        this.connectionStates = new ConcurrentHashMap<>();
         this.running = true;
+    }
+
+    public void setSharedList(SharedList sharedList) {
+        this.sharedList = sharedList;
     }
 
     private String generateNodeId() {
@@ -60,14 +58,10 @@ public class TCPNetworkModule {
             serverSocket.setSoTimeout(1000);
 
             threadManager.executeTask(this::acceptConnections);
-
-            System.out.println("✓ Modo servidor activo: Escuchando en puerto " + PORT);
-
-            threadManager.getScheduler().scheduleAtFixedRate(
-                    this::sendHeartbeats, 5, 5, TimeUnit.SECONDS);
+            System.out.println("✓ Servidor TCP escuchando en puerto " + PORT);
 
         } catch (IOException e) {
-            System.err.println("⚠ Error al iniciar servidor en puerto " + PORT + ": " + e.getMessage());
+            System.err.println("❌ Error al iniciar servidor: " + e.getMessage());
         }
     }
 
@@ -79,9 +73,8 @@ public class TCPNetworkModule {
             } catch (SocketTimeoutException e) {
                 // Timeout normal
             } catch (IOException e) {
-                if (running) {
+                if (running)
                     e.printStackTrace();
-                }
             }
         }
     }
@@ -96,31 +89,32 @@ public class TCPNetworkModule {
             if (synMessage.getType() == MessageType.TCP_SYN) {
                 String peerId = synMessage.getSenderId();
 
-                connectionStates.put(peerId, ConnectionState.SYN_RECEIVED);
-
+                // Enviar SYN-ACK
                 Message synAck = new Message(MessageType.TCP_SYN_ACK, nodeId);
-
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(synAck);
                 oos.flush();
 
+                // Esperar ACK
                 Message ackMessage = (Message) ois.readObject();
                 if (ackMessage.getType() == MessageType.TCP_ACK) {
-                    connectionStates.put(peerId, ConnectionState.ESTABLISHED);
-
                     PeerConnection conn = new PeerConnection(peerId, socket, ois, oos);
                     peers.put(peerId, conn);
 
-                    System.out.println("✓ Nueva conexión establecida con peer: " + peerId);
+                    System.out.println("✅ Nueva conexión establecida con peer: " + peerId);
 
+                    // Notificar a listeners
                     for (MessageListener listener : listeners) {
                         listener.onPeerConnected(peerId);
                     }
 
+                    // Anunciar nuestros archivos inmediatamente
+                    announceSharedFiles(conn);
+
                     threadManager.executeTask(() -> listenToPeer(conn));
                 }
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             try {
                 socket.close();
             } catch (IOException ex) {
@@ -129,15 +123,12 @@ public class TCPNetworkModule {
     }
 
     public void connectToPeer(String host) {
-        if (peers.containsKey(host)) {
+        if (peers.containsKey(host))
             return;
-        }
 
-        System.out.println("→ Modo cliente: Conectando a peer " + host);
+        System.out.println("🔌 Conectando a peer: " + host);
 
         try {
-            connectionStates.put(host, ConnectionState.SYN_SENT);
-
             Socket socket = new Socket(host, PORT);
             socket.setSoTimeout(CONNECTION_TIMEOUT);
 
@@ -150,8 +141,6 @@ public class TCPNetworkModule {
             Message synAck = (Message) ois.readObject();
 
             if (synAck.getType() == MessageType.TCP_SYN_ACK) {
-                connectionStates.put(host, ConnectionState.ESTABLISHED);
-
                 Message ack = new Message(MessageType.TCP_ACK, nodeId);
                 oos.writeObject(ack);
                 oos.flush();
@@ -160,18 +149,35 @@ public class TCPNetworkModule {
                 PeerConnection conn = new PeerConnection(peerId, socket, ois, oos);
                 peers.put(peerId, conn);
 
-                System.out.println("✓ Conectado exitosamente a peer: " + peerId);
+                System.out.println("✅ Conectado a peer: " + peerId);
 
                 for (MessageListener listener : listeners) {
                     listener.onPeerConnected(peerId);
                 }
 
+                // Anunciar nuestros archivos
+                announceSharedFiles(conn);
+
                 threadManager.executeTask(() -> listenToPeer(conn));
             }
+        } catch (Exception e) {
+            System.err.println("❌ Error conectando a " + host + ": " + e.getMessage());
+        }
+    }
 
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("⚠ No se pudo conectar a " + host + ": " + e.getMessage());
-            connectionStates.remove(host);
+    private void announceSharedFiles(PeerConnection conn) {
+        try {
+            if (sharedList != null) {
+                List<String> files = new ArrayList<>(sharedList.getSharedFiles());
+                System.out.println("📢 Anunciando " + files.size() + " archivos a " + conn.getPeerId() + ": " + files);
+
+                Message announce = new Message(MessageType.PEER_ANNOUNCE, nodeId);
+                announce.addPayload("sharedFiles", files);
+                conn.getOos().writeObject(announce);
+                conn.getOos().flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -179,69 +185,22 @@ public class TCPNetworkModule {
         try {
             while (running && conn.isConnected()) {
                 Message message = (Message) conn.getOis().readObject();
-                conn.updateLastSeen();
 
-                processMessage(message, conn);
+                // Procesar mensaje
+                for (MessageListener listener : listeners) {
+                    listener.onMessage(message, conn);
+                }
 
-                switch (message.getType()) {
-                    case TCP_FIN:
-                        handleFin(conn, message);
-                        break;
-                    case TCP_FIN_ACK:
-                        handleFinAck(conn, message);
-                        break;
-                    case PEER_LEAVE:
-                        handlePeerLeave(conn.getPeerId());
-                        return;
+                // Responder a heartbeat
+                if (message.getType() == MessageType.HEARTBEAT) {
+                    Message pong = new Message(MessageType.HEARTBEAT, nodeId);
+                    sendMessage(pong, conn.getPeerId());
                 }
             }
-        } catch (EOFException e) {
-            System.out.println("Peer cerró conexión: " + conn.getPeerId());
-        } catch (IOException | ClassNotFoundException e) {
-            if (running) {
-                System.out.println("Error en conexión con " + conn.getPeerId());
-            }
+        } catch (Exception e) {
+            // Conexión cerrada
         } finally {
             closeConnection(conn);
-        }
-    }
-
-    private void processMessage(Message message, PeerConnection conn) {
-        for (MessageListener listener : listeners) {
-            listener.onMessage(message, conn);
-        }
-    }
-
-    private void handleFin(PeerConnection conn, Message finMessage) {
-        String peerId = conn.getPeerId();
-        connectionStates.put(peerId, ConnectionState.CLOSE_WAIT);
-
-        Message finAck = new Message(MessageType.TCP_FIN_ACK, nodeId);
-        sendMessage(finAck, peerId);
-
-        Message ourFin = new Message(MessageType.TCP_FIN, nodeId);
-        sendMessage(ourFin, peerId);
-
-        connectionStates.put(peerId, ConnectionState.LAST_ACK);
-    }
-
-    private void handleFinAck(PeerConnection conn, Message finAckMessage) {
-        String peerId = conn.getPeerId();
-        connectionStates.put(peerId, ConnectionState.TIME_WAIT);
-
-        threadManager.getScheduler().schedule(() -> {
-            connectionStates.remove(peerId);
-            peers.remove(peerId);
-        }, 2, TimeUnit.SECONDS);
-    }
-
-    private void handlePeerLeave(String peerId) {
-        peers.remove(peerId);
-        connectionStates.remove(peerId);
-        System.out.println("Peer desconectado: " + peerId);
-
-        for (MessageListener listener : listeners) {
-            listener.onPeerDisconnected(peerId);
         }
     }
 
@@ -258,76 +217,35 @@ public class TCPNetworkModule {
     }
 
     public void broadcast(Message message) {
-        for (PeerConnection conn : peers.values()) {
-            if (conn.isConnected()) {
-                try {
-                    conn.getOos().writeObject(message);
-                    conn.getOos().flush();
-                } catch (IOException e) {
-                    // Ignorar
-                }
-            }
+        for (PeerConnection conn : new ArrayList<>(peers.values())) {
+            sendMessage(message, conn.getPeerId());
         }
-    }
-
-    private void sendHeartbeats() {
-        Message heartbeat = new Message(MessageType.HEARTBEAT, nodeId);
-        broadcast(heartbeat);
-    }
-
-    public void discoverLocalPeers() {
-        System.out.println("🔍 Descubriendo peers en red local...");
-        // Implementación básica - se puede mejorar después
     }
 
     public void closeConnection(PeerConnection conn) {
         if (conn == null)
             return;
+        peers.remove(conn.getPeerId());
+        conn.close();
 
-        String peerId = conn.getPeerId();
-
-        try {
-            connectionStates.put(peerId, ConnectionState.FIN_WAIT_1);
-
-            Message fin = new Message(MessageType.TCP_FIN, nodeId);
-            conn.getOos().writeObject(fin);
-            conn.getOos().flush();
-
-        } catch (IOException e) {
-            // Ignorar
-        } finally {
-            conn.close();
-            peers.remove(peerId);
-            connectionStates.remove(peerId);
-
-            for (MessageListener listener : listeners) {
-                listener.onPeerDisconnected(peerId);
-            }
+        for (MessageListener listener : listeners) {
+            listener.onPeerDisconnected(conn.getPeerId());
         }
     }
 
     public void shutdown() {
         running = false;
-
         for (PeerConnection conn : new ArrayList<>(peers.values())) {
             closeConnection(conn);
         }
-
         try {
-            if (serverSocket != null) {
-                serverSocket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            serverSocket.close();
+        } catch (Exception e) {
         }
     }
 
     public void addListener(MessageListener listener) {
         listeners.add(listener);
-    }
-
-    public ThreadManager getThreadManager() {
-        return threadManager;
     }
 
     public String getNodeId() {
@@ -336,10 +254,6 @@ public class TCPNetworkModule {
 
     public Map<String, PeerConnection> getPeers() {
         return peers;
-    }
-
-    public boolean isConnectedTo(String peerId) {
-        return peers.containsKey(peerId);
     }
 
     public int getPeerCount() {
@@ -351,7 +265,6 @@ public class TCPNetworkModule {
         private final Socket socket;
         private final ObjectInputStream ois;
         private final ObjectOutputStream oos;
-        private long lastSeen;
 
         public PeerConnection(String peerId, Socket socket,
                 ObjectInputStream ois, ObjectOutputStream oos) {
@@ -359,15 +272,10 @@ public class TCPNetworkModule {
             this.socket = socket;
             this.ois = ois;
             this.oos = oos;
-            this.lastSeen = System.currentTimeMillis();
         }
 
         public boolean isConnected() {
             return socket != null && socket.isConnected() && !socket.isClosed();
-        }
-
-        public void updateLastSeen() {
-            this.lastSeen = System.currentTimeMillis();
         }
 
         public void close() {
@@ -379,7 +287,6 @@ public class TCPNetworkModule {
                 if (socket != null)
                     socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
 
@@ -393,10 +300,6 @@ public class TCPNetworkModule {
 
         public ObjectOutputStream getOos() {
             return oos;
-        }
-
-        public long getLastSeen() {
-            return lastSeen;
         }
     }
 }
