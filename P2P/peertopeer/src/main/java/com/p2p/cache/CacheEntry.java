@@ -18,4 +18,8 @@ public class CacheEntry {
     public NameServer.FileInfo getValue() {
         return value;
     }
+
+    public long getExpiration() {
+        return expiration;
+    }
 }

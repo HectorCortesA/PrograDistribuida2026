@@ -4,13 +4,15 @@ import com.p2p.nameserver.NameServer;
 import com.p2p.utils.FileUtils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
 
 public class FileEditor extends JFrame {
     private final JFrame parent;
-    private final String filename;
+    private String filename;
     private final NameServer nameServer;
 
     private JTextArea textArea;
@@ -110,18 +112,18 @@ public class FileEditor extends JFrame {
     }
 
     private void setupListeners() {
-        textArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+        textArea.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
                 isModified = true;
                 updateTitle();
             }
 
-            public void removeUpdate(javswing.event.DocumentEvent e) {
+            public void removeUpdate(DocumentEvent e) {
                 isModified = true;
                 updateTitle();
             }
 
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            public void changedUpdate(DocumentEvent e) {
                 isModified = true;
                 updateTitle();
             }
@@ -200,7 +202,9 @@ public class FileEditor extends JFrame {
 
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             currentFile = fileChooser.getSelectedFile();
+            filename = currentFile.getName();
             performSave(currentFile);
+            setTitle("Editor P2P - " + filename);
         }
     }
 
@@ -267,9 +271,10 @@ public class FileEditor extends JFrame {
 
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             currentFile = fileChooser.getSelectedFile();
-            loadFromFile(currentFile);
             filename = currentFile.getName();
+            loadFromFile(currentFile);
             statusLabel.setText("Archivo abierto: " + currentFile.getName());
+            setTitle("Editor P2P - " + filename);
         }
     }
 

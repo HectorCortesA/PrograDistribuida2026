@@ -1,5 +1,6 @@
 package com.p2p.monitor;
 
+import com.p2p.conflict.ConflictEntry;
 import com.p2p.conflict.ConflictRegistry;
 import com.p2p.metadata.FileMetadata;
 import com.p2p.metadata.MetadataStore;
@@ -120,34 +121,6 @@ public class Synchronizer {
     private void handleConflictDuringSync(String filename, FileMetadata oldMetadata) {
         logRegistry.error("Synchronizer",
                 "Conflicto detectado - No se puede sincronizar " + filename);
-
-        // Intentar resolución automática
-        ConflictEntry conflict = conflictRegistry.getConflict(filename);
-        if (conflict != null) {
-            // Estrategia: mantener la versión más reciente
-            resolveConflict(filename, "KEEP_LATEST");
-        }
-    }
-
-    private void resolveConflict(String filename, String strategy) {
-        logRegistry.info("Synchronizer",
-                "Resolviendo conflicto para " + filename + " con estrategia: " + strategy);
-
-        // Implementar diferentes estrategias de resolución
-        switch (strategy) {
-            case "KEEP_LATEST":
-                // Mantener la versión más reciente
-                break;
-            case "KEEP_LOCAL":
-                // Mantener versión local
-                break;
-            case "MERGE":
-                // Intentar fusionar (solo para archivos de texto)
-                break;
-            default:
-                logRegistry.warning("Synchronizer",
-                        "Estrategia de resolución no implementada: " + strategy);
-        }
     }
 
     private void synchronizeAllFiles() {

@@ -2,6 +2,7 @@ package com.p2p.shared;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -127,4 +128,5 @@ public class LogRegistry {
                     timestamp, level, component, message);
         }
     }
+
 }

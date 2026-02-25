@@ -26,6 +26,17 @@ public class TCPNetworkModule {
         FIN_WAIT_1, FIN_WAIT_2, TIME_WAIT, CLOSE_WAIT, LAST_ACK
     }
 
+    // Interfaz pública para listeners
+    public interface MessageListener {
+        void onMessage(Message message, PeerConnection source);
+
+        default void onPeerConnected(String peerId) {
+        }
+
+        default void onPeerDisconnected(String peerId) {
+        }
+    }
+
     public TCPNetworkModule(ThreadManager threadManager) {
         this.threadManager = threadManager;
         this.nodeId = generateNodeId();
@@ -45,16 +56,13 @@ public class TCPNetworkModule {
 
     public void start() {
         try {
-            // ROL SERVIDOR: Todos escuchan
             serverSocket = new ServerSocket(PORT);
             serverSocket.setSoTimeout(1000);
 
-            // Hilo para aceptar conexiones entrantes
             threadManager.executeTask(this::acceptConnections);
 
             System.out.println("✓ Modo servidor activo: Escuchando en puerto " + PORT);
 
-            // Heartbeat periódico
             threadManager.getScheduler().scheduleAtFixedRate(
                     this::sendHeartbeats, 5, 5, TimeUnit.SECONDS);
 
@@ -69,7 +77,7 @@ public class TCPNetworkModule {
                 Socket clientSocket = serverSocket.accept();
                 handleNewConnection(clientSocket);
             } catch (SocketTimeoutException e) {
-                // Timeout normal, continuar
+                // Timeout normal
             } catch (IOException e) {
                 if (running) {
                     e.printStackTrace();
@@ -82,27 +90,22 @@ public class TCPNetworkModule {
         try {
             socket.setSoTimeout(CONNECTION_TIMEOUT);
 
-            // Leer mensaje inicial (SYN)
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
             Message synMessage = (Message) ois.readObject();
 
             if (synMessage.getType() == MessageType.TCP_SYN) {
                 String peerId = synMessage.getSenderId();
 
-                // Estado: SYN_RECEIVED
                 connectionStates.put(peerId, ConnectionState.SYN_RECEIVED);
 
-                // Responder con SYN-ACK
                 Message synAck = new Message(MessageType.TCP_SYN_ACK, nodeId);
 
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(synAck);
                 oos.flush();
 
-                // Esperar ACK final
                 Message ackMessage = (Message) ois.readObject();
                 if (ackMessage.getType() == MessageType.TCP_ACK) {
-                    // Conexión establecida
                     connectionStates.put(peerId, ConnectionState.ESTABLISHED);
 
                     PeerConnection conn = new PeerConnection(peerId, socket, ois, oos);
@@ -110,12 +113,10 @@ public class TCPNetworkModule {
 
                     System.out.println("✓ Nueva conexión establecida con peer: " + peerId);
 
-                    // Notificar a listeners
                     for (MessageListener listener : listeners) {
                         listener.onPeerConnected(peerId);
                     }
 
-                    // Iniciar hilo para escuchar mensajes
                     threadManager.executeTask(() -> listenToPeer(conn));
                 }
             }
@@ -127,36 +128,30 @@ public class TCPNetworkModule {
         }
     }
 
-    // ROL CLIENTE: Conectarse a otros peers
     public void connectToPeer(String host) {
         if (peers.containsKey(host)) {
-            return; // Ya conectado
+            return;
         }
 
         System.out.println("→ Modo cliente: Conectando a peer " + host);
 
         try {
-            // Estado: CLOSED -> SYN_SENT
             connectionStates.put(host, ConnectionState.SYN_SENT);
 
             Socket socket = new Socket(host, PORT);
             socket.setSoTimeout(CONNECTION_TIMEOUT);
 
-            // Enviar SYN
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             Message syn = new Message(MessageType.TCP_SYN, nodeId);
             oos.writeObject(syn);
             oos.flush();
 
-            // Recibir SYN-ACK
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
             Message synAck = (Message) ois.readObject();
 
             if (synAck.getType() == MessageType.TCP_SYN_ACK) {
-                // Estado: SYN_SENT -> ESTABLISHED
                 connectionStates.put(host, ConnectionState.ESTABLISHED);
 
-                // Enviar ACK final
                 Message ack = new Message(MessageType.TCP_ACK, nodeId);
                 oos.writeObject(ack);
                 oos.flush();
@@ -167,15 +162,10 @@ public class TCPNetworkModule {
 
                 System.out.println("✓ Conectado exitosamente a peer: " + peerId);
 
-                // Notificar a listeners
                 for (MessageListener listener : listeners) {
                     listener.onPeerConnected(peerId);
                 }
 
-                // Anunciar nuestros archivos compartidos
-                announceSharedFiles(conn);
-
-                // Iniciar hilo para escuchar
                 threadManager.executeTask(() -> listenToPeer(conn));
             }
 
@@ -185,27 +175,14 @@ public class TCPNetworkModule {
         }
     }
 
-    private void announceSharedFiles(PeerConnection conn) {
-        try {
-            Message announce = new Message(MessageType.PEER_ANNOUNCE, nodeId);
-            // Aquí se enviarían los archivos compartidos
-            conn.getOos().writeObject(announce);
-            conn.getOos().flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void listenToPeer(PeerConnection conn) {
         try {
             while (running && conn.isConnected()) {
                 Message message = (Message) conn.getOis().readObject();
                 conn.updateLastSeen();
 
-                // Procesar mensaje
                 processMessage(message, conn);
 
-                // Manejar tipos especiales
                 switch (message.getType()) {
                     case TCP_FIN:
                         handleFin(conn, message);
@@ -239,11 +216,9 @@ public class TCPNetworkModule {
         String peerId = conn.getPeerId();
         connectionStates.put(peerId, ConnectionState.CLOSE_WAIT);
 
-        // Enviar FIN-ACK
         Message finAck = new Message(MessageType.TCP_FIN_ACK, nodeId);
         sendMessage(finAck, peerId);
 
-        // Enviar nuestro propio FIN
         Message ourFin = new Message(MessageType.TCP_FIN, nodeId);
         sendMessage(ourFin, peerId);
 
@@ -302,17 +277,7 @@ public class TCPNetworkModule {
 
     public void discoverLocalPeers() {
         System.out.println("🔍 Descubriendo peers en red local...");
-        try {
-            // Broadcast para descubrimiento
-            Message discovery = new Message(MessageType.PEER_DISCOVERY, nodeId);
-
-            // Enviar a broadcast address
-            InetAddress broadcastAddr = InetAddress.getByName("255.255.255.255");
-            // Implementar broadcast UDP rápido para descubrimiento inicial
-            // (mantenemos UDP solo para descubrimiento)
-        } catch (Exception e) {
-            // Ignorar
-        }
+        // Implementación básica - se puede mejorar después
     }
 
     public void closeConnection(PeerConnection conn) {
@@ -344,7 +309,6 @@ public class TCPNetworkModule {
     public void shutdown() {
         running = false;
 
-        // Cerrar todas las conexiones
         for (PeerConnection conn : new ArrayList<>(peers.values())) {
             closeConnection(conn);
         }
@@ -360,6 +324,10 @@ public class TCPNetworkModule {
 
     public void addListener(MessageListener listener) {
         listeners.add(listener);
+    }
+
+    public ThreadManager getThreadManager() {
+        return threadManager;
     }
 
     public String getNodeId() {
@@ -378,7 +346,6 @@ public class TCPNetworkModule {
         return peers.size();
     }
 
-    // Clase para mantener conexiones
     public static class PeerConnection {
         private final String peerId;
         private final Socket socket;
@@ -431,16 +398,5 @@ public class TCPNetworkModule {
         public long getLastSeen() {
             return lastSeen;
         }
-    }
-}
-
-// Interface para listeners
-interface MessageListener {
-    void onMessage(Message message, TCPNetworkModule.PeerConnection source);
-
-    default void onPeerConnected(String peerId) {
-    }
-
-    default void onPeerDisconnected(String peerId) {
     }
 }

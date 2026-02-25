@@ -75,17 +75,6 @@ public class TTLMonitor {
         // Actualizar metadatos
         metadata.setOwner(null);
         metadata.setExpiration(System.currentTimeMillis() + 3600000); // 1 hora más
-
-        // Notificar cambio
-        notifyOwnershipChange(filename, oldOwner, null);
-    }
-
-    private void notifyOwnershipChange(String filename, String oldOwner, String newOwner) {
-        logRegistry.info("TTLMonitor",
-                "Cambio de dueño para " + filename +
-                        ": " + oldOwner + " → " + (newOwner != null ? newOwner : "NINGUNO"));
-
-        // Aquí se implementaría la notificación a otros peers
     }
 
     public void updateTTL(String filename, long newTTL) {

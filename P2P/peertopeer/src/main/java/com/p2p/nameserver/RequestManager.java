@@ -71,15 +71,6 @@ public class RequestManager {
         }
     }
 
-    public void forwardQuery(Message message, String requestId) {
-        // Reenviar consulta a otros peers (excepto al que la envió)
-        String excludePeer = message.getSenderId();
-
-        nameServer.getNetworkModule().broadcast(message);
-
-        logRegistry.info("RequestManager", "Consulta reenviada a peers [ID: " + requestId + "]");
-    }
-
     private void handleTimeout(String requestId) {
         PendingRequest request = pendingRequests.remove(requestId);
         if (request != null) {

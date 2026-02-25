@@ -7,21 +7,20 @@ import com.p2p.network.MessageType;
 import com.p2p.network.TCPNetworkModule;
 import com.p2p.shared.LogRegistry;
 import com.p2p.shared.SharedList;
+import com.p2p.utils.FileUtils;
 
-import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConsensusManager implements com.p2p.network.MessageListener {
+public class ConsensusManager implements TCPNetworkModule.MessageListener {
     private final TCPNetworkModule networkModule;
     private final MetadataStore metadataStore;
     private final SharedList sharedList;
     private final LogRegistry logRegistry;
 
     private final Map<String, ConsensusVote> activeVotes;
-    private final Map<String, List<String>> pendingRequests;
     private final AtomicInteger consensusCounter;
 
     public ConsensusManager(TCPNetworkModule networkModule, MetadataStore metadataStore,
@@ -31,7 +30,6 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
         this.sharedList = sharedList;
         this.logRegistry = logRegistry;
         this.activeVotes = new ConcurrentHashMap<>();
-        this.pendingRequests = new ConcurrentHashMap<>();
         this.consensusCounter = new AtomicInteger(0);
 
         networkModule.addListener(this);
@@ -83,7 +81,6 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
     private void handleConsensusQuery(Message message, TCPNetworkModule.PeerConnection source) {
         String filename = (String) message.getPayload("filename");
         String voteId = (String) message.getPayload("voteId");
-        String initiator = (String) message.getPayload("initiator");
 
         logRegistry.info("ConsensusManager",
                 "Recibida consulta de consenso de " + source.getPeerId() +
@@ -93,21 +90,17 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
         boolean hasFile = metadataStore.hasMetadata(filename) ||
                 sharedList.isShared(filename);
 
-        // Verificar si el archivo está en uso (préstamos activos)
-        boolean inUse = false; // Aquí se consultaría al registro de conflictos
-
         Message response = new Message(MessageType.CONSENSUS_RESPONSE,
                 networkModule.getNodeId());
         response.addPayload("voteId", voteId);
         response.addPayload("filename", filename);
         response.addPayload("hasFile", hasFile);
-        response.addPayload("inUse", inUse);
         response.addPayload("responder", networkModule.getNodeId());
 
         networkModule.sendMessage(response, source.getPeerId());
 
         logRegistry.info("ConsensusManager",
-                "Respuesta enviada: hasFile=" + hasFile + ", inUse=" + inUse);
+                "Respuesta enviada: hasFile=" + hasFile);
     }
 
     private void handleConsensusResponse(Message message, TCPNetworkModule.PeerConnection source) {
@@ -116,14 +109,13 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
 
         if (vote != null) {
             boolean hasFile = (boolean) message.getPayload("hasFile");
-            boolean inUse = (boolean) message.getPayload("inUse");
             String responder = (String) message.getPayload("responder");
 
-            vote.addVote(responder, hasFile, inUse);
+            vote.addVote(responder, hasFile);
 
             logRegistry.info("ConsensusManager",
                     "Voto recibido de " + responder + ": hasFile=" + hasFile +
-                            ", inUse=" + inUse + " [Total: " + vote.getVoteCount() + "]");
+                            " [Total: " + vote.getVoteCount() + "]");
         }
     }
 
@@ -133,14 +125,12 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
             logRegistry.info("ConsensusManager",
                     "Finalizando votación " + voteId + " - Total votos: " + vote.getVoteCount());
 
-            ConsensusResult result = vote.getResult();
+            boolean shouldRemove = vote.shouldRemove();
 
             logRegistry.info("ConsensusManager",
-                    "Resultados: A favor=" + result.yesCount +
-                            ", En contra=" + result.noCount +
-                            ", Abstención=" + result.abstainCount);
+                    "Resultado: " + (shouldRemove ? "ELIMINAR" : "CONSERVAR"));
 
-            if (result.shouldRemove()) {
+            if (shouldRemove) {
                 // Consenso alcanzado: eliminar archivo
                 String filename = vote.getFilename();
                 executeFileRemoval(filename);
@@ -162,7 +152,7 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
         sharedList.removeFromList(filename);
 
         // Eliminar archivo físico
-        java.io.File sharedFile = com.p2p.utils.FileUtils.getSharedFile(filename);
+        java.io.File sharedFile = FileUtils.getSharedFile(filename);
         if (sharedFile.exists()) {
             if (sharedFile.delete()) {
                 logRegistry.info("ConsensusManager",
@@ -197,7 +187,7 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
         private final String voteId;
         private final String filename;
         private final String initiator;
-        private final Map<String, VoteRecord> votes;
+        private final Map<String, Boolean> votes;
         private final long startTime;
 
         public ConsensusVote(String voteId, String filename, String initiator) {
@@ -208,26 +198,16 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
             this.startTime = System.currentTimeMillis();
         }
 
-        public void addVote(String peerId, boolean hasFile, boolean inUse) {
-            votes.put(peerId, new VoteRecord(hasFile, inUse, System.currentTimeMillis()));
+        public void addVote(String peerId, boolean hasFile) {
+            votes.put(peerId, hasFile);
         }
 
-        public ConsensusResult getResult() {
-            int yes = 0, no = 0, abstain = 0;
+        public boolean shouldRemove() {
+            if (votes.isEmpty())
+                return false;
 
-            for (VoteRecord record : votes.values()) {
-                if (record.hasFile) {
-                    yes++;
-                } else {
-                    if (record.inUse) {
-                        no++; // En uso = voto en contra
-                    } else {
-                        abstain++; // No tiene archivo ni en uso = abstención
-                    }
-                }
-            }
-
-            return new ConsensusResult(yes, no, abstain);
+            long yesVotes = votes.values().stream().filter(v -> !v).count();
+            return yesVotes > votes.size() / 2;
         }
 
         public int getVoteCount() {
@@ -236,40 +216,6 @@ public class ConsensusManager implements com.p2p.network.MessageListener {
 
         public String getFilename() {
             return filename;
-        }
-
-        private static class VoteRecord {
-            private final boolean hasFile;
-            private final boolean inUse;
-            private final long timestamp;
-
-            public VoteRecord(boolean hasFile, boolean inUse, long timestamp) {
-                this.hasFile = hasFile;
-                this.inUse = inUse;
-                this.timestamp = timestamp;
-            }
-        }
-    }
-
-    // Resultado de la votación
-    private static class ConsensusResult {
-        private final int yesCount;
-        private final int noCount;
-        private final int abstainCount;
-
-        public ConsensusResult(int yes, int no, int abstain) {
-            this.yesCount = yes;
-            this.noCount = no;
-            this.abstainCount = abstain;
-        }
-
-        public boolean shouldRemove() {
-            // Regla: mayoría simple de votos positivos (excluyendo abstenciones)
-            int totalVotes = yesCount + noCount;
-            if (totalVotes == 0)
-                return false;
-
-            return yesCount > totalVotes / 2;
         }
     }
 }

@@ -10,7 +10,7 @@ import com.p2p.shared.LogRegistry;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NameServer implements MessageListener {
+public class NameServer implements TCPNetworkModule.MessageListener {
     private final TCPNetworkModule networkModule;
     private final SharedList sharedList;
     private final MetadataStore metadataStore;
@@ -189,6 +189,14 @@ public class NameServer implements MessageListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public LocalCache getLocalCache() {
+        return localCache;
+    }
+
+    public TCPNetworkModule getNetworkModule() {
+        return networkModule;
     }
 
     // Clase FileInfo

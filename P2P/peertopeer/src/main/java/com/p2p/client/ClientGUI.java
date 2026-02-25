@@ -1,8 +1,11 @@
 package com.p2p.client;
 
 import com.p2p.nameserver.NameServer;
+import com.p2p.network.Message;
+import com.p2p.network.MessageType;
 import com.p2p.network.TCPNetworkModule;
 import com.p2p.shared.SharedList;
+import com.p2p.metadata.FileMetadata;
 import com.p2p.metadata.MetadataStore;
 import com.p2p.shared.LogRegistry;
 import com.p2p.utils.FileUtils;

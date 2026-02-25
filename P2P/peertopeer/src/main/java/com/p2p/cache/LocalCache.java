@@ -25,4 +25,12 @@ public class LocalCache {
     public void clear() {
         cache.clear();
     }
+
+    public int size() {
+        return cache.size();
+    }
+
+    public void cleanup() {
+        cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    }
 }

@@ -18,9 +18,8 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=====================================");
-        System.out.println("Iniciando Nodo P2P File Sharing...");
-        System.out.println("=====================================");
+
+        System.out.println("Iniciando Nodo P2P Archivo Compartido...");
 
         // Cada nodo tiene TODOS los componentes (Peer puro)
         ThreadManager threadManager = new ThreadManager();
@@ -43,7 +42,7 @@ public class Main {
         // Monitores y sincronizadores
         TTLMonitor ttlMonitor = new TTLMonitor(localCache, metadataStore, threadManager);
         Synchronizer synchronizer = new Synchronizer(metadataStore, conflictRegistry,
-                activeCopies, networkModule);
+                activeCopies, networkModule, threadManager);
         ConsensusManager consensusManager = new ConsensusManager(networkModule, metadataStore,
                 sharedList, logRegistry);
 
@@ -68,11 +67,12 @@ public class Main {
             }
         }
 
-        // Descubrir peers automáticamente (broadcast local)
+        // Descubrir peers automáticamente
         networkModule.discoverLocalPeers();
 
         // Iniciar monitores
         ttlMonitor.start();
+        synchronizer.start();
 
         // Iniciar GUI
         SwingUtilities.invokeLater(() -> {
@@ -81,16 +81,17 @@ public class Main {
             clientGUI.setVisible(true);
         });
 
-        System.out.println("✓ Nodo P2P completamente inicializado");
-        System.out.println("=====================================");
+        System.out.println("Nodo P2P completamente inicializado");
 
         // Hook para shutdown graceful
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("→ Nodo saliendo de la red P2P...");
+            System.out.println(" Nodo saliendo de la red P2P...");
+            ttlMonitor.stop();
+            synchronizer.stop();
             networkModule.shutdown();
             threadManager.shutdown();
             logRegistry.close();
-            System.out.println("✓ Nodo desconectado correctamente");
+            System.out.println("Nodo desconectado correctamente");
         }));
     }
 }
