@@ -2,44 +2,35 @@ package com.p2p.network;
 
 public enum MessageType {
     // TCP Handshake
-    TCP_SYN,
-    TCP_SYN_ACK,
-    TCP_ACK,
-    TCP_FIN,
-    TCP_FIN_ACK,
+    TCP_SYN, TCP_SYN_ACK, TCP_ACK, TCP_FIN, TCP_FIN_ACK,
 
     // Peticiones de nombres
-    NAME_QUERY,
-    NAME_RESPONSE,
+    NAME_QUERY, NAME_RESPONSE,
 
     // Peticiones de archivos
-    FILE_REQUEST,
-    FILE_RESPONSE,
-    FILE_TRANSFER,
-    FILE_DATA,
-    FILE_COMPLETE,
+    FILE_REQUEST, FILE_RESPONSE, FILE_TRANSFER, FILE_DATA, FILE_COMPLETE,
+
+    // Devolución de archivo editado al dueño
+    FILE_RETURNED,
 
     // Descubrimiento
-    PEER_DISCOVERY,
-    PEER_ANNOUNCE,
-    PEER_LIST,
-    PEER_LEAVE,
+    PEER_DISCOVERY, PEER_ANNOUNCE, PEER_LIST, PEER_LEAVE,
 
     // Sincronización
-    SYNC_REQUEST,
-    SYNC_RESPONSE,
+    SYNC_REQUEST, SYNC_RESPONSE,
 
     // Conflictos
-    CONFLICT_DETECTED,
-    CONFLICT_RESOLVED,
+    CONFLICT_DETECTED, CONFLICT_RESOLVED,
 
     // Consenso
-    CONSENSUS_QUERY,
-    CONSENSUS_RESPONSE,
+    CONSENSUS_QUERY, CONSENSUS_RESPONSE,
 
     // Heartbeat
     HEARTBEAT,
 
     // NACK
-    NACK_RESPONSE
+    NACK_RESPONSE,
+
+    // Logs distribuidos
+    LOG_REQUEST, LOG_RESPONSE
 }

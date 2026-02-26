@@ -1,251 +1,494 @@
 package com.p2p.client;
 
 import com.p2p.nameserver.NameServer;
+import com.p2p.network.FileTransferTCP;
 import com.p2p.network.Message;
 import com.p2p.network.MessageType;
 import com.p2p.network.TCPNetworkModule;
-import com.p2p.shared.SharedList;
 import com.p2p.shared.LogRegistry;
+import com.p2p.shared.SharedList;
+import com.p2p.metadata.FileMetadata;
+import com.p2p.metadata.MetadataStore;
 import com.p2p.utils.FileUtils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
 
 public class ClientGUI extends JFrame {
-    private final NameServer nameServer;
+
+    private final NameServer       nameServer;
     private final TCPNetworkModule networkModule;
-    private final SharedList sharedList;
-    private final LogRegistry logRegistry;
+    private final SharedList       sharedList;
+    private final MetadataStore    metadataStore;
+    private final LogRegistry      logRegistry;
 
-    private DefaultListModel<String> localListModel;
-    private DefaultListModel<String> remoteListModel;
+    private DefaultListModel<String> sharedListModel;
     private DefaultListModel<String> peersListModel;
+    private JList<String>  sharedFilesList;
+    private JList<String>  peersList;
+    private JTextArea      logArea;
+    private JLabel         statusLabel;
 
-    // NUEVO: Label de estado para notificaciones
-    private JLabel statusLabel;
+    // ── Visor de logs distribuido ──────────────────────────────────────
+    private JTextArea      distLogArea;
+    private JTextField     distLogFilter;
+    /** Logs remotos recibidos de otros nodos (peerId → líneas). */
+    private final Map<String, List<String>> remoteLogCache = new LinkedHashMap<>();
 
     public ClientGUI(NameServer nameServer, TCPNetworkModule networkModule,
-            SharedList sharedList, LogRegistry logRegistry) {
-        this.nameServer = nameServer;
+            SharedList sharedList, MetadataStore metadataStore, LogRegistry logRegistry) {
+        this.nameServer    = nameServer;
         this.networkModule = networkModule;
-        this.sharedList = sharedList;
-        this.logRegistry = logRegistry;
+        this.sharedList    = sharedList;
+        this.metadataStore = metadataStore;
+        this.logRegistry   = logRegistry;
+
+        // Registrar listener para recibir respuestas de logs remotos
+        networkModule.addListener(new RemoteLogListener());
 
         initializeGUI();
-        updateLists();
+        refreshAll();
 
-        // Timer para actualizar cada 3 segundos (respaldo)
-        new Timer(3000, e -> updateLists()).start();
+        nameServer.addFileListListener(() -> SwingUtilities.invokeLater(this::refreshAll));
 
-        // NUEVO: Registrar listener en NameServer para notificación inmediata
-        // cuando un peer remoto comparte/actualiza sus archivos
-        nameServer.setRemoteFilesListener((peerId, files) -> {
-            // Ejecutar en el hilo de Swing (EDT)
-            SwingUtilities.invokeLater(() -> {
-                updateLists();
-                showPeerNotification(peerId, files);
-                // FIX: Registrar en log con el componente correcto
-                logRegistry.info("GUI", "📡 Archivos recibidos de " + peerId + ": " + files);
-            });
-        });
+        // Actualizar lista cada 3 s y logs locales cada 2 s
+        new Timer(3000, e -> SwingUtilities.invokeLater(this::refreshAll)).start();
+        new Timer(2000, e -> SwingUtilities.invokeLater(this::refreshLocalLog)).start();
     }
 
-    private void initializeGUI() {
-        setTitle("P2P File Sharing - " + networkModule.getNodeId());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(850, 550);
-        setLocationRelativeTo(null);
+    // ── Parseo ───────────────────────────────────────────────────────────
 
-        JTabbedPane tabbedPane = new JTabbedPane();
-
-        // ── Panel de archivos ──────────────────────────────────────────────
-        JPanel filesPanel = new JPanel(new BorderLayout(5, 5));
-        filesPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        JPanel listsPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-
-        // Archivos locales
-        JPanel localPanel = new JPanel(new BorderLayout());
-        localPanel.setBorder(BorderFactory.createTitledBorder("📁 Mis Archivos"));
-        localListModel = new DefaultListModel<>();
-        JList<String> localList = new JList<>(localListModel);
-        localList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        localPanel.add(new JScrollPane(localList), BorderLayout.CENTER);
-
-        JButton shareBtn = new JButton("Compartir Archivo");
-        shareBtn.addActionListener(e -> shareFile());
-        localPanel.add(shareBtn, BorderLayout.SOUTH);
-
-        // Archivos remotos — MEJORADO: muestra "archivo ← peer"
-        JPanel remotePanel = new JPanel(new BorderLayout());
-        remotePanel.setBorder(
-                BorderFactory.createTitledBorder("🌐 Archivos de la Red  (archivo  ←  peer)"));
-        remoteListModel = new DefaultListModel<>();
-        JList<String> remoteList = new JList<>(remoteListModel);
-        remoteList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        // Resaltar entradas con color diferente para distinguir peers
-        remoteList.setCellRenderer(new RemoteFileCellRenderer());
-        remotePanel.add(new JScrollPane(remoteList), BorderLayout.CENTER);
-
-        JButton refreshBtn = new JButton("Actualizar");
-        refreshBtn.addActionListener(e -> {
-            updateLists();
-            logRegistry.info("GUI", "Lista actualizada manualmente");
-        });
-        remotePanel.add(refreshBtn, BorderLayout.SOUTH);
-
-        listsPanel.add(localPanel);
-        listsPanel.add(remotePanel);
-
-        // NUEVO: Barra de estado en la parte inferior
-        statusLabel = new JLabel("  ✅ Sistema P2P listo");
-        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.ITALIC));
-        statusLabel.setForeground(new Color(0, 120, 0));
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
-
-        filesPanel.add(listsPanel, BorderLayout.CENTER);
-        filesPanel.add(statusLabel, BorderLayout.SOUTH);
-
-        // ── Panel de peers ─────────────────────────────────────────────────
-        JPanel peersPanel = new JPanel(new BorderLayout());
-        peersPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        peersListModel = new DefaultListModel<>();
-        JList<String> peersList = new JList<>(peersListModel);
-        peersPanel.add(new JScrollPane(peersList), BorderLayout.CENTER);
-
-        JButton connectBtn = new JButton("Conectar a Peer");
-        connectBtn.addActionListener(e -> showConnectDialog());
-        peersPanel.add(connectBtn, BorderLayout.SOUTH);
-
-        tabbedPane.addTab("Archivos", filesPanel);
-        tabbedPane.addTab("Peers", peersPanel);
-
-        add(tabbedPane);
+    private String parseFilename(String item) {
+        int i = item.lastIndexOf("] ");
+        return (i >= 0) ? item.substring(i + 2).trim() : item.trim();
     }
 
-    /** NUEVO: Muestra notificación temporal cuando un peer comparte archivos */
-    private void showPeerNotification(String peerId, List<String> files) {
-        String msg = "📡 " + peerId + " comparte: " + files.toString();
-        statusLabel.setText("  " + msg);
-        statusLabel.setForeground(new Color(0, 100, 200));
+    private String parsePeerOwner(String item) {
+        int s = item.indexOf('[') + 1;
+        int e = item.indexOf(']');
+        if (s > 0 && e > s) return item.substring(s, e).split(",")[0].trim();
+        return null;
+    }
 
-        // Volver al estado normal después de 4 segundos
-        new Timer(4000, e -> {
-            statusLabel.setText("  ✅ Sistema P2P listo");
-            statusLabel.setForeground(new Color(0, 120, 0));
-            ((Timer) e.getSource()).stop();
+    private boolean isRemoteItem(String item) {
+        return item.startsWith("🌐");
+    }
+
+    // ── Refresco ─────────────────────────────────────────────────────────
+
+    private void refreshAll() {
+        peersListModel.clear();
+        networkModule.getPeers().forEach((peerId, conn) ->
+                peersListModel.addElement(peerId + (conn.isConnected() ? "  ✓" : "  ✗")));
+
+        sharedListModel.clear();
+        for (String f : sharedList.getSharedFiles())
+            sharedListModel.addElement("📄 [Local] " + f);
+
+        Set<String> connectedPeers = networkModule.getPeers().keySet();
+        nameServer.getFileLocations().forEach((filename, owners) -> {
+            List<String> active = new ArrayList<>();
+            for (String owner : owners)
+                if (connectedPeers.contains(owner)) active.add(owner);
+            if (!active.isEmpty())
+                sharedListModel.addElement("🌐 [" + String.join(", ", active) + "] " + filename);
+        });
+
+        statusLabel.setText("🟢 Peers: " + networkModule.getPeerCount()
+                + " | Archivos locales: " + sharedList.getSharedFiles().size());
+    }
+
+    /** Actualiza el área de log local con las entradas nuevas. */
+    private void refreshLocalLog() {
+        List<LogRegistry.LogEntry> entries = logRegistry.getRecentLogs();
+        if (entries.isEmpty()) return;
+        // Solo mostrar las últimas 200 líneas para no sobrecargar
+        int start = Math.max(0, entries.size() - 200);
+        StringBuilder sb = new StringBuilder();
+        for (int i = start; i < entries.size(); i++) {
+            LogRegistry.LogEntry e = entries.get(i);
+            sb.append(String.format("[%s] %s %-15s: %s%n",
+                    e.timestamp, e.level, e.component, e.message));
+        }
+        String content = sb.toString();
+        // Solo actualizar si hay contenido nuevo
+        if (!logArea.getText().endsWith(entries.get(entries.size()-1).message + "\n")) {
+            logArea.setText(content);
+            logArea.setCaretPosition(logArea.getDocument().getLength());
+        }
+    }
+
+    // ── Descargar ─────────────────────────────────────────────────────────
+
+    private void downloadSelectedFile() {
+        String selected = sharedFilesList.getSelectedValue();
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!isRemoteItem(selected)) {
+            JOptionPane.showMessageDialog(this, "Ese archivo ya está en tu nodo.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        String filename    = parseFilename(selected);
+        String ownerPeerId = parsePeerOwner(selected);
+        if (ownerPeerId == null) { log("No se pudo determinar el peer de: " + filename); return; }
+
+        log("⬇ Descargando '" + filename + "' de " + ownerPeerId + "...");
+        new Thread(() -> {
+            try {
+                FileTransferTCP.DownloadResult dlResult =
+                        FileTransferTCP.downloadFile(ownerPeerId, filename, "shared");
+                File dest = dlResult.file;
+                sharedList.addFile(dest.getName());
+                metadataStore.addMetadata(FileMetadata.fromFile(dest));
+                SwingUtilities.invokeLater(() -> { log("✅ Descargado: " + dest.getName()); refreshAll(); });
+            } catch (Exception ex) {
+                SwingUtilities.invokeLater(() -> log("❌ Error descargando: " + ex.getMessage()));
+            }
         }).start();
     }
 
-    private void shareFile() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File("."));
+    // ── Ver / Editar ──────────────────────────────────────────────────────
 
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            try {
-                File dest = FileUtils.getSharedFile(file.getName());
-                FileUtils.copyFile(file, dest);
-                sharedList.addFile(file.getName());
-
-                // FIX: Registrar en log (genera las entradas "GUI" que aparecen en el log)
-                logRegistry.info("GUI", "✅ Archivo compartido: " + file.getName());
-
-                // Anunciar a todos los peers
-                broadcastSharedFiles();
-
-                // FIX: Log del anuncio
-                logRegistry.info("GUI",
-                        "📢 Anunciando " + sharedList.getSharedFiles().size() +
-                                " archivos compartidos a la red: " + sharedList.getSharedFiles());
-
-                updateLists();
-                statusLabel.setText("  ✅ Compartido: " + file.getName());
-                statusLabel.setForeground(new Color(0, 120, 0));
-
-            } catch (Exception ex) {
-                logRegistry.error("GUI", "Error compartiendo archivo: " + ex.getMessage());
-                JOptionPane.showMessageDialog(this,
-                        "❌ Error: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private void broadcastSharedFiles() {
-        Message msg = new Message(MessageType.PEER_ANNOUNCE, networkModule.getNodeId());
-        msg.addPayload("sharedFiles", new ArrayList<>(sharedList.getSharedFiles()));
-        networkModule.broadcast(msg);
-    }
-
-    private void showConnectDialog() {
-        String host = JOptionPane.showInputDialog(this,
-                "Dirección IP del peer (ej: 192.168.1.100):");
-        if (host != null && !host.trim().isEmpty()) {
-            logRegistry.info("GUI", "Intentando conectar a peer: " + host.trim());
-            networkModule.connectToPeer(host.trim());
-        }
-    }
-
-    private void updateLists() {
-        // FIX: Siempre actualizar en el EDT
-        if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(this::updateLists);
+    private void viewSelectedFile() {
+        String selected = sharedFilesList.getSelectedValue();
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        String filename    = parseFilename(selected);
+        boolean remote     = isRemoteItem(selected);
+        String ownerPeerId = remote ? parsePeerOwner(selected) : null;
+        new FileEditor(this, filename, nameServer, remote, ownerPeerId, networkModule).setVisible(true);
+    }
 
-        // Actualizar archivos locales
-        localListModel.clear();
-        for (String file : sharedList.getSharedFiles()) {
-            localListModel.addElement(file);
+    // ── Compartir ─────────────────────────────────────────────────────────
+
+    private void shareFile() {
+        JFileChooser fc = new JFileChooser();
+        if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        File file = fc.getSelectedFile();
+        File dest = FileUtils.getSharedFile(file.getName());
+        try {
+            FileUtils.copyFile(file, dest);
+            sharedList.addFile(file.getName());
+            metadataStore.addMetadata(FileMetadata.fromFile(dest));
+            Message ann = new Message(MessageType.PEER_ANNOUNCE, networkModule.getNodeId());
+            ann.addPayload("sharedFiles", sharedList.getSharedFiles());
+            networkModule.broadcast(ann);
+            log("📤 Compartido: " + file.getName());
+            refreshAll();
+        } catch (Exception e) {
+            log("Error compartiendo: " + e.getMessage());
         }
+    }
 
-        // MEJORADO: Archivos remotos con información del peer (archivo ← peer)
-        remoteListModel.clear();
-        for (String entry : nameServer.getRemoteFilesWithPeerInfo()) {
-            remoteListModel.addElement(entry);
-        }
+    // ── Construcción GUI ──────────────────────────────────────────────────
 
-        // Actualizar peers
-        peersListModel.clear();
-        for (String peerId : networkModule.getPeers().keySet()) {
-            peersListModel.addElement("🔗 " + peerId);
-        }
+    private void initializeGUI() {
+        setTitle("P2P File Sharing - Nodo: " + networkModule.getNodeId());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(980, 680);
+        setLocationRelativeTo(null);
 
-        setTitle("P2P File Sharing - " + networkModule.getNodeId() +
-                " | Peers: " + networkModule.getPeerCount() +
-                " | Locales: " + sharedList.getSharedFiles().size() +
-                " | Remotos: " + nameServer.getRemoteFiles().size());
+        JPanel main = new JPanel(new BorderLayout(10, 10));
+        main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        main.add(buildTopPanel(),    BorderLayout.NORTH);
+        main.add(buildCenterTabs(),  BorderLayout.CENTER);
+        add(main);
+        buildMenuBar();
+    }
+
+    private JPanel buildTopPanel() {
+        JPanel p = new JPanel(new BorderLayout(5, 5));
+        p.setBorder(BorderFactory.createEtchedBorder());
+        statusLabel = new JLabel("Iniciando...");
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        JButton refresh = new JButton("🔄 Actualizar");
+        refresh.addActionListener(e -> refreshAll());
+        JButton connect = new JButton("🔗 Conectar a Peer");
+        connect.addActionListener(e -> showConnectDialog());
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btns.add(connect); btns.add(refresh);
+        p.add(statusLabel, BorderLayout.WEST);
+        p.add(btns, BorderLayout.EAST);
+        return p;
     }
 
     /**
-     * NUEVO: Renderer personalizado para resaltar archivos remotos con colores
-     * según el peer que los comparte.
+     * Panel central con pestañas:
+     *   1. Archivos + Peers + Log local (vista principal)
+     *   2. Visor de logs distribuido
      */
-    private static class RemoteFileCellRenderer extends DefaultListCellRenderer {
-        // Colores para distinguir visualmente entradas de distintos peers
-        private static final Color[] PEER_COLORS = {
-                new Color(230, 240, 255),
-                new Color(230, 255, 240),
-                new Color(255, 245, 220),
-                new Color(250, 230, 255),
-        };
+    private JTabbedPane buildCenterTabs() {
+        JTabbedPane tabs = new JTabbedPane();
 
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value,
-                int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        // ── Pestaña 1: Vista principal ──
+        JPanel main = new JPanel(new BorderLayout(6, 6));
+        JSplitPane topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        topSplit.setResizeWeight(0.65);
+        topSplit.setLeftComponent(buildFilesPanel());
+        topSplit.setRightComponent(buildPeersPanel());
 
-            if (!isSelected && value != null) {
-                // Colorear por índice para diferenciar visualmente los peers
-                setBackground(PEER_COLORS[index % PEER_COLORS.length]);
+        JSplitPane fullSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        fullSplit.setResizeWeight(0.6);
+        fullSplit.setTopComponent(topSplit);
+        fullSplit.setBottomComponent(buildLocalLogPanel());
+
+        main.add(fullSplit, BorderLayout.CENTER);
+        tabs.addTab("📁 Archivos y Red", main);
+
+        // ── Pestaña 2: Logs distribuidos ──
+        tabs.addTab("📡 Logs Distribuidos", buildDistributedLogPanel());
+
+        return tabs;
+    }
+
+    private JPanel buildFilesPanel() {
+        JPanel p = new JPanel(new BorderLayout(5, 5));
+        p.setBorder(BorderFactory.createTitledBorder("📁 Archivos en la Red"));
+        sharedListModel = new DefaultListModel<>();
+        sharedFilesList = new JList<>(sharedListModel);
+        sharedFilesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        p.add(new JScrollPane(sharedFilesList), BorderLayout.CENTER);
+        JPanel btns = new JPanel(new FlowLayout());
+        JButton dl    = new JButton("⬇ Descargar");  dl.addActionListener(e -> downloadSelectedFile());
+        JButton view  = new JButton("👁 Ver/Editar"); view.addActionListener(e -> viewSelectedFile());
+        JButton share = new JButton("📤 Compartir");  share.addActionListener(e -> shareFile());
+        btns.add(dl); btns.add(view); btns.add(share);
+        p.add(btns, BorderLayout.SOUTH);
+        return p;
+    }
+
+    private JPanel buildPeersPanel() {
+        JPanel p = new JPanel(new BorderLayout(5, 5));
+        p.setBorder(BorderFactory.createTitledBorder("🖧 Peers Conectados"));
+        peersListModel = new DefaultListModel<>();
+        peersList      = new JList<>(peersListModel);
+        p.add(new JScrollPane(peersList), BorderLayout.CENTER);
+        JPanel btns = new JPanel(new FlowLayout());
+        JButton disco = new JButton("Desconectar");
+        disco.addActionListener(e -> {
+            String sel = peersList.getSelectedValue();
+            if (sel != null) {
+                String peerId = sel.split("  ")[0];
+                TCPNetworkModule.PeerConnection conn = networkModule.getPeers().get(peerId);
+                if (conn != null) networkModule.closeConnection(conn);
+                refreshAll();
             }
-            setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-            return this;
+        });
+        btns.add(disco);
+        p.add(btns, BorderLayout.SOUTH);
+        return p;
+    }
+
+    private JPanel buildLocalLogPanel() {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBorder(BorderFactory.createTitledBorder("📋 Registro de Actividad Local"));
+        logArea = new JTextArea(8, 80);
+        logArea.setEditable(false);
+        logArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
+        p.add(new JScrollPane(logArea), BorderLayout.CENTER);
+        return p;
+    }
+
+    /**
+     * Pestaña 2 — Visor de logs distribuido.
+     *
+     * Permite:
+     *  - Solicitar logs de TODOS los peers conectados.
+     *  - Combinar los logs locales y remotos en una sola vista ordenada por tiempo.
+     *  - Filtrar por texto (ej: nombre de archivo, componente) para trazar una operación.
+     */
+    private JPanel buildDistributedLogPanel() {
+        JPanel p = new JPanel(new BorderLayout(5, 5));
+        p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // ── Barra de controles ──
+        JPanel controls = new JPanel(new BorderLayout(5, 5));
+        controls.setBorder(BorderFactory.createTitledBorder("Filtrar y Actualizar"));
+
+        JPanel filterRow = new JPanel(new BorderLayout(5, 0));
+        filterRow.add(new JLabel("🔍 Filtrar por texto: "), BorderLayout.WEST);
+        distLogFilter = new JTextField();
+        filterRow.add(distLogFilter, BorderLayout.CENTER);
+        JButton applyFilter = new JButton("Aplicar");
+        applyFilter.addActionListener(e -> renderDistLog());
+        distLogFilter.addActionListener(e -> renderDistLog());
+        filterRow.add(applyFilter, BorderLayout.EAST);
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton fetchAll = new JButton("📡 Obtener logs de todos los peers");
+        fetchAll.addActionListener(e -> fetchRemoteLogs());
+        JButton clear = new JButton("🗑 Limpiar");
+        clear.addActionListener(e -> { remoteLogCache.clear(); renderDistLog(); });
+        btnRow.add(fetchAll); btnRow.add(clear);
+
+        controls.add(filterRow, BorderLayout.CENTER);
+        controls.add(btnRow, BorderLayout.SOUTH);
+
+        // ── Área de logs ──
+        distLogArea = new JTextArea();
+        distLogArea.setEditable(false);
+        distLogArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
+
+        // ── Info ──
+        JLabel info = new JLabel(
+            "<html><i>Los logs muestran la traza de operaciones de todos los nodos. " +
+            "Filtra por un nombre de archivo para ver todos los eventos relacionados.</i></html>");
+        info.setForeground(Color.GRAY);
+        info.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+        p.add(controls,              BorderLayout.NORTH);
+        p.add(new JScrollPane(distLogArea), BorderLayout.CENTER);
+        p.add(info,                  BorderLayout.SOUTH);
+        return p;
+    }
+
+    /**
+     * Solicita los logs recientes a todos los peers conectados.
+     * Las respuestas llegan de forma asíncrona a través de RemoteLogListener.
+     */
+    private void fetchRemoteLogs() {
+        int peers = networkModule.getPeerCount();
+        if (peers == 0) {
+            JOptionPane.showMessageDialog(this,
+                "No hay peers conectados.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        Message req = new Message(MessageType.LOG_REQUEST, networkModule.getNodeId());
+        networkModule.broadcast(req);
+        log("📡 Solicitando logs a " + peers + " peers...");
+
+        // Incluir logs locales inmediatamente
+        List<String> localLines = new ArrayList<>();
+        for (LogRegistry.LogEntry e : logRegistry.getRecentLogs())
+            localLines.add(String.format("[%s] %s %-15s: %s",
+                    e.timestamp, e.level, e.component, e.message));
+        remoteLogCache.put("LOCAL (" + networkModule.getNodeId() + ")", localLines);
+        renderDistLog();
+    }
+
+    /**
+     * Renderiza el visor distribuido combinando logs locales y remotos,
+     * aplicando el filtro si está definido.
+     */
+    private void renderDistLog() {
+        String filter = distLogFilter.getText().trim().toLowerCase();
+        List<String> allLines = new ArrayList<>();
+
+        // Logs locales siempre incluidos
+        String localKey = "LOCAL (" + networkModule.getNodeId() + ")";
+        if (!remoteLogCache.containsKey(localKey)) {
+            List<String> localLines = new ArrayList<>();
+            for (LogRegistry.LogEntry e : logRegistry.getRecentLogs())
+                localLines.add(String.format("[%s] %s %-15s: %s",
+                        e.timestamp, e.level, e.component, e.message));
+            remoteLogCache.put(localKey, localLines);
+        }
+
+        // Combinar todos los logs con encabezado por nodo
+        for (Map.Entry<String, List<String>> entry : remoteLogCache.entrySet()) {
+            allLines.add("═══ NODO: " + entry.getKey() + " ═══");
+            for (String line : entry.getValue()) {
+                if (filter.isEmpty() || line.toLowerCase().contains(filter))
+                    allLines.add(line);
+            }
+            allLines.add("");
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (allLines.isEmpty()) {
+            sb.append("Sin entradas. Usa '📡 Obtener logs' para cargar logs de los peers.");
+        } else {
+            for (String line : allLines) sb.append(line).append("\n");
+        }
+        distLogArea.setText(sb.toString());
+        distLogArea.setCaretPosition(0);
+    }
+
+    // ── Menú y diálogos ──────────────────────────────────────────────────
+
+    private void buildMenuBar() {
+        JMenuBar bar = new JMenuBar();
+        JMenu file = new JMenu("Archivo");
+        JMenuItem exit = new JMenuItem("Salir");
+        exit.addActionListener(e -> { networkModule.shutdown(); System.exit(0); });
+        file.add(exit);
+        JMenu help = new JMenu("Ayuda");
+        JMenuItem about = new JMenuItem("Acerca de");
+        about.addActionListener(e -> JOptionPane.showMessageDialog(this,
+                "P2P File Sharing v2.0\nNodo: " + networkModule.getNodeId(), "Info",
+                JOptionPane.INFORMATION_MESSAGE));
+        help.add(about);
+        bar.add(file); bar.add(help);
+        setJMenuBar(bar);
+    }
+
+    private void showConnectDialog() {
+        JPanel panel = new JPanel(new GridLayout(3, 1, 5, 5));
+        panel.add(new JLabel("IP del peer (solo IP, sin puerto):"));
+        JTextField ip = new JTextField(); ip.selectAll();
+        panel.add(ip);
+        panel.add(new JLabel("El puerto 8888 se usa automáticamente"));
+
+        if (JOptionPane.showConfirmDialog(this, panel, "Conectar a Peer",
+                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            String addr = ip.getText().trim().replaceAll(":.*", "");
+            if (!addr.isEmpty()) {
+                log("Conectando a: " + addr + "...");
+                new Thread(() -> {
+                    networkModule.connectToPeer(addr);
+                    SwingUtilities.invokeLater(() -> { log("Conexión procesada: " + addr); refreshAll(); });
+                }, "connect-thread").start();
+            }
+        }
+    }
+
+    private void log(String msg) {
+        String ts = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        SwingUtilities.invokeLater(() -> {
+            logArea.append("[" + ts + "] " + msg + "\n");
+            logArea.setCaretPosition(logArea.getDocument().getLength());
+        });
+        logRegistry.info("GUI", msg);
+    }
+
+    // ── Listener para respuestas de logs remotos ──────────────────────────
+
+    /**
+     * Escucha mensajes LOG_RESPONSE de peers remotos y los almacena para
+     * mostrarlos en el visor distribuido.
+     */
+    private class RemoteLogListener implements TCPNetworkModule.MessageListener {
+        @Override
+        public void onMessage(Message message, TCPNetworkModule.PeerConnection source) {
+            if (message.getType() != MessageType.LOG_RESPONSE) return;
+
+            String nodeId = (String) message.getPayload("nodeId");
+            @SuppressWarnings("unchecked")
+            List<String> lines = (List<String>) message.getPayload("logs");
+            if (nodeId == null || lines == null) return;
+
+            SwingUtilities.invokeLater(() -> {
+                remoteLogCache.put("REMOTO (" + nodeId + ")", lines);
+                renderDistLog();
+                log("📡 Logs recibidos de: " + nodeId + " (" + lines.size() + " entradas)");
+            });
+        }
+
+        @Override public void onPeerConnected(String peerId) {}
+        @Override public void onPeerDisconnected(String peerId) {
+            SwingUtilities.invokeLater(() -> {
+                remoteLogCache.remove("REMOTO (" + peerId + ")");
+                renderDistLog();
+            });
         }
     }
 }

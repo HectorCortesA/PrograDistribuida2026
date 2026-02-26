@@ -32,7 +32,6 @@ public class ConsensusManager implements TCPNetworkModule.MessageListener {
         this.activeVotes = new ConcurrentHashMap<>();
         this.consensusCounter = new AtomicInteger(0);
 
-        networkModule.addListener(this);
     }
 
     public void initiateFileRemovalConsensus(String filename) {

@@ -1,16 +1,12 @@
 package com.p2p.cache;
 
-import com.p2p.metadata.FileMetadata;
+import com.p2p.nameserver.NameServer;
 
-/**
- * FIX: La clase original referenciaba NameServer.FileInfo que no existe.
- * Se reemplaza por FileMetadata, que es la clase que realmente se usa.
- */
 public class CacheEntry {
-    private final FileMetadata value;
+    private final NameServer.FileInfo value;
     private final long expiration;
 
-    public CacheEntry(FileMetadata value, long expiration) {
+    public CacheEntry(NameServer.FileInfo value, long expiration) {
         this.value = value;
         this.expiration = expiration;
     }
@@ -19,7 +15,7 @@ public class CacheEntry {
         return System.currentTimeMillis() > expiration;
     }
 
-    public FileMetadata getValue() {
+    public NameServer.FileInfo getValue() {
         return value;
     }
 

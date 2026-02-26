@@ -2,131 +2,85 @@ package com.p2p.shared;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * LogRegistry — una sola instancia real en toda la JVM.
+ * Todos los "new LogRegistry()" comparten el mismo estado interno.
+ * No hay deadlock porque synchronized está sobre el objeto singleton, no sobre
+ * cada instancia wrapper.
+ */
 public class LogRegistry {
+
+    // ── Estado real, compartido por todas las instancias ─────────────────
     private static final String LOG_FILE = "p2p_activity.log";
-    private static final int MAX_LOG_ENTRIES = 1000;
+    private static final int MAX_ENTRIES = 1000;
 
-    private final PrintWriter logWriter;
-    private final ConcurrentLinkedQueue<LogEntry> recentLogs;
-    private final DateTimeFormatter formatter;
+    private static PrintWriter logWriter;
+    private static final ConcurrentLinkedQueue<LogEntry> recentLogs = new ConcurrentLinkedQueue<>();
+    private static final DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private static boolean initialized = false;
 
+    // ── Constructor (todos los "new LogRegistry()" llegan aquí) ──────────
     public LogRegistry() {
-        this.recentLogs = new ConcurrentLinkedQueue<>();
-        this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(new FileWriter(LOG_FILE, true));
-        } catch (IOException e) {
-            System.err.println("No se pudo abrir archivo de log: " + e.getMessage());
-        }
-        this.logWriter = writer;
-
-        // Log inicial
-        info("System", "Sistema de logs iniciado");
-    }
-
-    public void log(String level, String component, String message) {
-        String timestamp = LocalDateTime.now().format(formatter);
-        String logEntry = String.format("[%s] %-7s %-15s: %s",
-                timestamp, level, component, message);
-
-        // Mostrar en consola
-        if (level.equals("ERROR")) {
-            System.err.println(logEntry);
-        } else {
-            System.out.println(logEntry);
-        }
-
-        // Guardar en archivo
-        if (logWriter != null) {
-            logWriter.println(logEntry);
-            logWriter.flush();
-        }
-
-        // Mantener logs recientes
-        LogEntry entry = new LogEntry(timestamp, level, component, message);
-        recentLogs.offer(entry);
-
-        // Limitar tamaño
-        while (recentLogs.size() > MAX_LOG_ENTRIES) {
-            recentLogs.poll();
+        synchronized (LogRegistry.class) {
+            if (!initialized) {
+                initialized = true;
+                try {
+                    logWriter = new PrintWriter(new FileWriter(LOG_FILE, true));
+                } catch (IOException e) {
+                    System.err.println("No se pudo abrir log: " + e.getMessage());
+                }
+                // Mensaje de inicio — solo una vez
+                doLog("INFO   ", "System", "Sistema de logs iniciado");
+            }
         }
     }
 
+    // ── API pública ───────────────────────────────────────────────────────
     public void info(String component, String message) {
-        log("INFO", component, message);
+        doLog("INFO   ", component, message);
     }
 
     public void warning(String component, String message) {
-        log("WARNING", component, message);
+        doLog("WARNING", component, message);
     }
 
     public void error(String component, String message) {
-        log("ERROR", component, message);
+        doLog("ERROR  ", component, message);
     }
 
-    public void debug(String component, String message) {
-        // Solo mostrar si está habilitado debug
-        if (Boolean.parseBoolean(System.getProperty("debug", "false"))) {
-            log("DEBUG", component, message);
+    private static synchronized void doLog(String level, String component, String message) {
+        String timestamp = LocalDateTime.now().format(formatter);
+        String line = String.format("[%s] %s %-15s: %s", timestamp, level, component, message);
+        System.out.println(line);
+        if (logWriter != null) {
+            logWriter.println(line);
+            logWriter.flush();
         }
+        recentLogs.offer(new LogEntry(timestamp, level, component, message));
+        while (recentLogs.size() > MAX_ENTRIES) recentLogs.poll();
     }
 
-    public void success(String component, String message) {
-        log("SUCCESS", component, "✅ " + message);
+    public List<LogEntry> getRecentLogs() {
+        return new ArrayList<>(recentLogs);
     }
 
-    public List<LogEntry> getRecentLogs(int count) {
-        return recentLogs.stream()
-                .limit(count)
-                .toList();
-    }
-
-    public List<LogEntry> getLogsByLevel(String level, int count) {
-        return recentLogs.stream()
-                .filter(entry -> entry.level().equals(level))
-                .limit(count)
-                .toList();
-    }
-
-    public List<LogEntry> getLogsByComponent(String component, int count) {
-        return recentLogs.stream()
-                .filter(entry -> entry.component().equals(component))
-                .limit(count)
-                .toList();
-    }
-
-    public void exportLogs(String filename) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            for (LogEntry entry : recentLogs) {
-                writer.println(entry);
-            }
-            info("LogRegistry", "Logs exportados a: " + filename);
-        } catch (IOException e) {
-            error("LogRegistry", "Error exportando logs: " + e.getMessage());
-        }
-    }
-
-    public void close() {
-        info("System", "Sistema de logs detenido");
+    public static synchronized void close() {
         if (logWriter != null) {
             logWriter.close();
+            logWriter = null;
         }
     }
 
-    // Record para entradas de log
-    public record LogEntry(String timestamp, String level,
-            String component, String message) {
-        @Override
-        public String toString() {
-            return String.format("[%s] %s %s: %s",
-                    timestamp, level, component, message);
+    public static class LogEntry {
+        public final String timestamp, level, component, message;
+        public LogEntry(String ts, String lv, String comp, String msg) {
+            timestamp = ts; level = lv; component = comp; message = msg;
         }
     }
-
 }

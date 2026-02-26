@@ -10,37 +10,55 @@ import java.security.NoSuchAlgorithmException;
 public class FileMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Valor especial de expiración que indica TTL = 0 (siempre disponible).
+     * Un archivo con este valor NUNCA debe ser expirado ni actualizado.
+     */
+    public static final long TTL_FOREVER = Long.MAX_VALUE;
+
     private final String filename;
     private String checksum;
     private String owner;
-    private long expiration;
+    private long expiration;   // System.currentTimeMillis() + TTL, o TTL_FOREVER
     private long size;
     private long lastModified;
+    private long creationDate; // ← NUEVO: fecha de creación del archivo
     private String fileType;
     private boolean isShared;
 
     public FileMetadata(String filename, String checksum, String owner,
             long expiration, long size) {
-        this.filename = filename;
-        this.checksum = checksum;
-        this.owner = owner;
-        this.expiration = expiration;
-        this.size = size;
+        this.filename     = filename;
+        this.checksum     = checksum;
+        this.owner        = owner;
+        this.expiration   = expiration;
+        this.size         = size;
         this.lastModified = System.currentTimeMillis();
-        this.fileType = getFileExtension(filename);
-        this.isShared = false;
+        this.creationDate = System.currentTimeMillis(); // se sobreescribe en fromFile()
+        this.fileType     = getFileExtension(filename);
+        this.isShared     = false;
     }
 
     public static FileMetadata fromFile(File file) {
         try {
             String filename = file.getName();
             String checksum = FileUtils.calculateChecksum(file);
-            long size = file.length();
-            long lastModified = file.lastModified();
+            long size       = file.length();
+            long lastMod    = file.lastModified();
 
             FileMetadata metadata = new FileMetadata(filename, checksum, null,
-                    Long.MAX_VALUE, size);
-            metadata.setLastModified(lastModified);
+                    TTL_FOREVER, size);
+            metadata.setLastModified(lastMod);
+            // Intentar obtener fecha real de creación (Java 7+ NIO)
+            try {
+                java.nio.file.attribute.BasicFileAttributes attrs =
+                        java.nio.file.Files.readAttributes(
+                                file.toPath(),
+                                java.nio.file.attribute.BasicFileAttributes.class);
+                metadata.creationDate = attrs.creationTime().toMillis();
+            } catch (Exception e) {
+                metadata.creationDate = lastMod; // fallback
+            }
             return metadata;
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -50,76 +68,47 @@ public class FileMetadata implements Serializable {
 
     private static String getFileExtension(String filename) {
         int lastDot = filename.lastIndexOf('.');
-        if (lastDot > 0) {
-            return filename.substring(lastDot + 1).toLowerCase();
-        }
-        return "unknown";
+        return (lastDot > 0) ? filename.substring(lastDot + 1).toLowerCase() : "unknown";
+    }
+
+    /** Un archivo con TTL_FOREVER nunca expira (TTL = 0 según el enunciado). */
+    public boolean isForever() {
+        return expiration == TTL_FOREVER;
     }
 
     public boolean isExpired() {
+        if (isForever()) return false;
         return System.currentTimeMillis() > expiration;
     }
 
-    // Getters y setters
-    public String getFilename() {
-        return filename;
-    }
+    // ── Getters y Setters ─────────────────────────────────────────────────
 
-    public String getChecksum() {
-        return checksum;
-    }
+    public String getFilename()     { return filename; }
+    public String getChecksum()     { return checksum; }
+    public void   setChecksum(String c) { this.checksum = c; }
 
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
+    public String getOwner()        { return owner; }
+    public void   setOwner(String o){ this.owner = o; }
 
-    public String getOwner() {
-        return owner;
-    }
+    public long getExpiration()     { return expiration; }
+    public void setExpiration(long e){ this.expiration = e; }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
+    public long getSize()           { return size; }
+    public void setSize(long s)     { this.size = s; }
 
-    public long getExpiration() {
-        return expiration;
-    }
+    public long getLastModified()   { return lastModified; }
+    public void setLastModified(long lm){ this.lastModified = lm; }
 
-    public void setExpiration(long expiration) {
-        this.expiration = expiration;
-    }
+    public long getCreationDate()   { return creationDate; }
+    public void setCreationDate(long cd){ this.creationDate = cd; }
 
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public boolean isShared() {
-        return isShared;
-    }
-
-    public void setShared(boolean shared) {
-        isShared = shared;
-    }
+    public String getFileType()     { return fileType; }
+    public boolean isShared()       { return isShared; }
+    public void setShared(boolean s){ this.isShared = s; }
 
     @Override
     public String toString() {
-        return String.format("%s [%s] %d bytes - dueño: %s",
-                filename, fileType, size, owner != null ? owner : "local");
+        return String.format("%s [%s] %d bytes - dueño: %s", filename, fileType, size,
+                owner != null ? owner : "local");
     }
 }

@@ -1,64 +1,772 @@
-[2026-02-25 14:13:59.507] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:13:59.509] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:13:59.510] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:13:59.510] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:13:59.510] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:14:47.493] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:14:47.495] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:14:47.496] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:14:47.496] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:14:47.496] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.594] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.596] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.596] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.597] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.597] INFO    System         : Sistema de logs iniciado
-[2026-02-25 14:18:45.604] INFO    TTLMonitor     : Monitor TTL iniciado
-[2026-02-25 14:18:45.604] INFO    Synchronizer   : Sincronizador iniciado
-[2026-02-25 14:19:15.607] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:19:45.607] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:20:15.607] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:20:45.607] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:21:15.606] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:21:45.606] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:22:15.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:22:45.606] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:23:15.603] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:23:45.605] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:24:15.603] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:24:22.256] INFO    GUI            : ✅ Archivo compartido: pom.xml
-[2026-02-25 14:24:22.272] INFO    GUI            : 📢 Anunciando 1 archivos compartidos a la red: [pom.xml]
-[2026-02-25 14:24:30.753] INFO    GUI            : Lista actualizada manualmente
-[2026-02-25 14:24:45.605] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:25:15.605] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:25:45.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:26:01.330] INFO    GUI            : Lista actualizada manualmente
-[2026-02-25 14:26:15.602] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:26:45.602] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:27:15.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:27:45.602] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:27:58.220] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
-[2026-02-25 14:27:58.220] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
-[2026-02-25 14:27:58.224] INFO    NameServer     : Recibido PEER_ANNOUNCE de 192.168.102.1:8888
-[2026-02-25 14:27:58.225] INFO    NameServer     : Archivo remoto: .project en peer 192.168.102.1:8888
-[2026-02-25 14:27:58.229] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos: [.project]
-[2026-02-25 14:27:58.229] INFO    NameServer     : Recibido PEER_ANNOUNCE de 192.168.102.1:8888
-[2026-02-25 14:27:58.229] INFO    NameServer     : Archivo remoto: .project en peer 192.168.102.1:8888
-[2026-02-25 14:27:58.229] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos: [.project]
-[2026-02-25 14:28:04.979] INFO    GUI            : Lista actualizada manualmente
-[2026-02-25 14:28:15.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:28:18.470] INFO    GUI            : ✅ Archivo compartido: nodo_1.log
-[2026-02-25 14:28:18.475] INFO    GUI            : 📢 Anunciando 2 archivos compartidos a la red: [pom.xml, nodo_1.log]
-[2026-02-25 14:28:28.031] INFO    GUI            : Lista actualizada manualmente
-[2026-02-25 14:28:45.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:29:15.604] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:29:45.603] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:30:15.601] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:30:45.603] INFO    Synchronizer   : Iniciando sincronización completa
-[2026-02-25 14:31:07.677] INFO    TTLMonitor     : Monitor TTL detenido
-[2026-02-25 14:31:07.677] INFO    Synchronizer   : Sincronizador detenido
-[2026-02-25 14:31:07.681] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
-[2026-02-25 14:31:07.681] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
-[2026-02-25 14:31:07.681] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
-[2026-02-25 14:31:07.681] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
-[2026-02-25 14:31:07.682] INFO    System         : Sistema de logs detenido
+[2026-02-25 15:51:45.057] INFO    System         : Sistema de logs iniciado
+[2026-02-25 15:51:45.058] INFO    System         : Sistema de logs iniciado
+[2026-02-25 15:51:45.059] INFO    System         : Sistema de logs iniciado
+[2026-02-25 15:51:45.059] INFO    System         : Sistema de logs iniciado
+[2026-02-25 15:51:45.060] INFO    System         : Sistema de logs iniciado
+[2026-02-25 15:51:45.069] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 15:51:45.069] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 15:52:15.070] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:52:45.072] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:53:15.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:53:45.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:54:42.188] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:55:12.189] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:55:42.190] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:56:12.189] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:56:42.190] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:57:12.192] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:57:42.190] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:58:12.190] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:58:42.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:58:49.036] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 15:58:49.036] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 15:59:12.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:59:12.546] INFO    GUI            : Archivo compartido: bogam.zip
+[2026-02-25 15:59:42.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 15:59:44.107] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 15:59:44.107] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 15:59:44.108] INFO    GUI            : Conectando a peer: 172.31.10.158
+[2026-02-25 15:59:52.447] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:52.448] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:52.448] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:52.448] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:58.075] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:58.075] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:58.076] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 15:59:58.076] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:00:12.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:00:42.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:01:12.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:01:42.194] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:02:12.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:02:42.193] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:03:12.195] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:03:42.194] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:04:11.634] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:04:11.634] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:04:11.638] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:04:21.934] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:04:21.936] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:04:21.936] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:04:21.937] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:04:21.937] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:04:21.955] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:04:21.955] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:04:51.959] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:04:53.553] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:04:53.557] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:04:53.563] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.564] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.566] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.566] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.697] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.698] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.698] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.699] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.699] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.700] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.700] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:04:53.700] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 0 archivos
+[2026-02-25 16:05:21.958] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:05:23.031] INFO    GUI            : Archivo compartido: Menu.code-workspace
+[2026-02-25 16:05:51.958] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:06:03.685] INFO    GUI            : Archivo compartido: HojaDesempeño.pdf
+[2026-02-25 16:06:21.957] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:06:51.959] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:07:21.959] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:07:24.738] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:07:24.739] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:07:40.864] INFO    GUI            : Iniciando descarga de: 🌐 [192.168.102.1:8888, 192.168.102.1:8888] Algoritmos Criptográficos.jpg
+[2026-02-25 16:07:51.960] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:08:21.960] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:08:51.961] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:09:21.960] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:09:41.745] INFO    GUI            : Iniciando descarga de: 🌐 [192.168.102.1:8888, 192.168.102.1:8888] Algoritmos Criptográficos.jpg
+[2026-02-25 16:09:51.961] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:10:21.960] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:10:51.938] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:11:21.919] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:11:51.917] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:12:02.417] INFO    GUI            : Iniciando descarga de: 📄 [Local] Menu.code-workspace
+[2026-02-25 16:12:21.916] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:12:51.916] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:13:21.915] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:13:51.916] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:14:21.916] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:14:49.951] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:14:49.952] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:14:49.958] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:14:49.959] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:14:49.959] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:14:49.959] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:14:49.960] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:15:22.494] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:15:22.495] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:15:22.496] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:15:22.496] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:15:22.496] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:15:22.544] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:15:22.545] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:15:52.550] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:16:22.547] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:16:52.550] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:17:09.715] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:17:09.716] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:17:09.719] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.719] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.719] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.719] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.877] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.878] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.878] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.878] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.879] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.879] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.879] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:09.879] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:17:14.773] INFO    NameServer     : Iniciando recepción de: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:14.773] INFO    NameServer     : Iniciando recepción de: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:14.781] INFO    NameServer     : Archivo recibido y guardado: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:14.812] INFO    NameServer     : Iniciando recepción de: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:14.812] INFO    NameServer     : Iniciando recepción de: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:14.825] INFO    NameServer     : Archivo recibido y guardado: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:22.549] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:17:32.330] INFO    GUI            : Solicitando 'Algoritmos Criptográficos.jpg' al peer: 192.168.102.1:8888
+[2026-02-25 16:17:32.332] INFO    GUI            : Solicitud enviada. Espera unos segundos y refresca...
+[2026-02-25 16:17:32.479] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:17:32.480] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:17:32.480] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:17:32.480] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:17:52.546] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:17:52.557] INFO    Synchronizer   : Cambio detectado en archivo: Algoritmos Criptográficos.jpg
+[2026-02-25 16:17:52.558] INFO    Synchronizer   : Cambio propagado para: Algoritmos Criptográficos.jpg
+[2026-02-25 16:18:09.044] INFO    GUI            : Archivo compartido: pom.xml
+[2026-02-25 16:18:16.582] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:18:16.585] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:18:16.587] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.588] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.589] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.589] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.715] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.715] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:16.716] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:22.550] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:18:37.926] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:18:37.927] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:18:37.929] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:18:37.929] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:18:37.929] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:18:37.929] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:18:37.929] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:18:40.815] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:18:40.817] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:18:40.818] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:18:40.818] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:18:40.819] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:18:40.847] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:18:40.848] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:18:58.262] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:18:58.266] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:18:58.272] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.273] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.274] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.275] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.783] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.783] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.784] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.785] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.785] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.785] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.786] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:18:58.786] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:19:10.852] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:19:18.793] INFO    NameServer     : Solicitud de archivo: pom.xml de 192.168.102.1:8888
+[2026-02-25 16:19:18.797] INFO    NameServer     : Solicitud de archivo: pom.xml de 192.168.102.1:8888
+[2026-02-25 16:19:18.797] INFO    NameServer     : Enviando archivo: pom.xml a 192.168.102.1:8888
+[2026-02-25 16:19:18.798] INFO    NameServer     : Enviando archivo: pom.xml a 192.168.102.1:8888
+[2026-02-25 16:19:18.801] INFO    NameServer     : Error enviando archivo pom.xml: not in readObject invocation or fields already read
+[2026-02-25 16:19:18.875] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.876] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.876] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.876] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.877] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.877] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.877] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:18.877] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:19:40.849] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:20:06.356] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:20:06.359] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:20:06.361] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.362] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.363] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.364] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.734] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.734] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.735] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.735] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.736] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.736] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.736] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:06.736] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:20:10.848] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:20:13.086] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:20:13.087] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:20:13.087] INFO    NameServer     : Enviando archivo: HojaDesempeño.pdf a 192.168.102.1:8888
+[2026-02-25 16:20:13.087] INFO    NameServer     : Enviando archivo: HojaDesempeño.pdf a 192.168.102.1:8888
+[2026-02-25 16:20:13.117] INFO    NameServer     : Archivo enviado correctamente: HojaDesempeño.pdf
+[2026-02-25 16:20:13.119] INFO    ConflictRegistry: Préstamo registrado: HojaDesempeño.pdf para 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:13.149] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:20:40.850] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:21:10.853] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:21:16.371] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:21:16.373] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:21:16.375] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:16.376] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:16.376] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:16.376] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.115] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.116] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.116] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.117] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.117] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.118] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.118] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:17.119] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:21:21.021] INFO    GUI            : Solicitando 'Algoritmos Criptográficos.jpg' al peer: 192.168.102.1:8888
+[2026-02-25 16:21:21.023] INFO    GUI            : Solicitud enviada. Espera unos segundos y refresca...
+[2026-02-25 16:21:21.069] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:21:21.070] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:21:21.070] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:21:21.070] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:21:40.852] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:22:07.637] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:22:07.638] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:22:07.638] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.638] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.638] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.638] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.777] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:07.778] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:22:10.853] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:22:40.850] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:22:50.789] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:22:50.790] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:22:50.790] INFO    NameServer     : Enviando archivo: HojaDesempeño.pdf a 192.168.102.1:8888
+[2026-02-25 16:22:50.790] INFO    NameServer     : Enviando archivo: HojaDesempeño.pdf a 192.168.102.1:8888
+[2026-02-25 16:22:50.808] INFO    NameServer     : Archivo enviado correctamente: HojaDesempeño.pdf
+[2026-02-25 16:22:50.809] INFO    ConflictRegistry: Préstamo registrado: HojaDesempeño.pdf para 192.168.102.1:8888
+[2026-02-25 16:22:50.816] WARNING ConflictRegistry: 🚨 CONFLICTO DETECTADO #1 para archivo: HojaDesempeño.pdf entre: 192.168.102.1:8888, 192.168.102.1:8888
+[2026-02-25 16:22:50.816] INFO    ConflictRegistry: Notificación de conflicto #1 enviada a involucrados
+[2026-02-25 16:22:50.932] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:22:50.932] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:22:50.932] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:22:50.932] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:23:10.849] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:23:40.849] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:24:10.853] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:24:40.851] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:25:10.849] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:25:40.851] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:26:10.865] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:26:40.872] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:26:51.213] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:26:51.215] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:26:51.218] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:29:27.937] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:29:27.939] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:29:27.939] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:29:27.940] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:29:27.940] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:29:27.979] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:29:27.979] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:29:57.983] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:30:23.451] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:30:23.454] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:30:23.461] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.462] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.464] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.464] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.861] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.861] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.862] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.863] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.863] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.864] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.864] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:23.864] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:30:27.983] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:30:57.985] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:31:27.984] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:31:55.839] INFO    GUI            : Solicitando 'Algoritmos Criptográficos.jpg' al peer: 192.168.102.1:8888
+[2026-02-25 16:31:55.842] INFO    GUI            : Solicitud enviada. Espera unos segundos y refresca...
+[2026-02-25 16:31:56.106] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:31:56.107] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:31:56.107] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:31:56.107] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:31:57.983] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:32:27.983] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:32:54.458] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:32:54.460] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:32:54.462] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.462] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.464] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.464] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.657] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.657] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.658] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.658] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.659] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.659] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.659] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:54.660] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:32:57.982] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:33:04.105] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:33:04.108] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.113] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.114] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.114] INFO    NameServer     : Sirviendo archivo en puerto 8889: HojaDesempeño.pdf
+[2026-02-25 16:33:04.114] INFO    NameServer     : Sirviendo archivo en puerto 8889: HojaDesempeño.pdf
+[2026-02-25 16:33:04.114] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.114] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.114] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:33:04.117] INFO    NameServer     : Error sirviendo archivo HojaDesempeño.pdf: Address already in use
+[2026-02-25 16:33:19.117] INFO    NameServer     : Error sirviendo archivo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:33:27.986] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:33:57.983] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:34:27.984] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:34:57.982] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:35:13.731] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:35:13.732] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:35:13.733] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:35:47.452] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:35:47.454] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:35:47.455] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:35:47.455] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:35:47.456] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:35:47.494] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:35:47.494] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:36:15.133] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:36:15.133] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:36:15.135] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:36:19.109] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:36:19.110] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:36:19.111] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:36:19.111] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:36:19.112] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:36:19.140] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:36:19.140] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:36:49.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:37:04.944] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:37:04.949] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:37:05.140] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.140] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.144] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.144] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.152] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.153] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.154] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.154] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.338] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.339] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.339] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:05.339] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:19.141] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:37:33.661] INFO    GUI            : Desconectando peer: 192.168.102.1:8888
+[2026-02-25 16:37:49.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:37:56.394] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:37:56.395] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:37:56.398] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.398] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.401] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.402] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.672] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.673] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.673] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.673] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.674] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.674] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.674] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:37:56.674] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:04.307] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:04.308] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:04.308] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:04.309] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:09.824] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:09.824] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:09.824] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:09.824] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:17.618] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:38:17.619] INFO    NameServer     : Nuevo peer conectado: 192.168.102.1:8888
+[2026-02-25 16:38:17.622] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.622] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.731] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.731] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.754] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.754] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.755] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.755] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.755] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.755] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.756] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:17.756] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:38:19.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:38:32.522] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:38:32.524] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:38:32.527] INFO    NameServer     : Sirviendo archivo en puerto 8889: HojaDesempeño.pdf
+[2026-02-25 16:38:32.527] INFO    NameServer     : Sirviendo archivo en puerto 8889: HojaDesempeño.pdf
+[2026-02-25 16:38:32.530] INFO    NameServer     : Error sirviendo archivo HojaDesempeño.pdf: Address already in use
+[2026-02-25 16:38:32.604] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:32.604] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:32.604] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:32.604] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:38:47.530] INFO    NameServer     : Error sirviendo archivo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:38:49.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:39:19.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:39:49.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:40:19.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:40:49.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:41:19.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:41:49.126] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:42:19.110] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:42:49.107] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:43:19.106] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:43:49.106] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:44:19.106] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:44:49.107] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:45:03.843] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:45:03.844] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:45:03.847] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:49:07.001] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:49:07.003] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:49:07.003] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:49:07.004] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:49:07.004] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:49:07.041] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:49:07.042] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:49:37.044] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:49:50.866] INFO    NameServer     : Peer conectado: 192.168.102.1:8888
+[2026-02-25 16:49:50.867] INFO    NameServer     : Peer conectado: 192.168.102.1:8888
+[2026-02-25 16:49:50.871] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:50.871] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:50.897] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:50.897] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.026] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.026] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.026] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.027] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.177] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.178] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.179] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:51.180] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:49:57.703] INFO    GUI            : ⬇ Descargando 'Algoritmos Criptográficos.jpg' de 192.168.102.1:8888...
+[2026-02-25 16:50:07.045] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:50:13.320] INFO    GUI            : ❌ Error descargando: Connect timed out
+[2026-02-25 16:50:14.806] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:14.807] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:14.813] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:14.813] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:14.813] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:50:30.375] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:30.376] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:30.377] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:30.377] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:50:30.377] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:30.377] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:50:34.816] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:50:37.042] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:50:47.641] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:47.643] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:50:47.643] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:47.643] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:50:47.643] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:51:07.046] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:51:07.645] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:51:21.934] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:51:21.935] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:51:21.936] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:51:21.936] INFO    ConsensusManager: Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:51:37.044] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:51:42.245] INFO    NameServer     : Peer conectado: 192.168.102.1:8888
+[2026-02-25 16:51:42.246] INFO    NameServer     : Peer conectado: 192.168.102.1:8888
+[2026-02-25 16:51:42.248] INFO    GUI            : Conectando a: 172.31.10.158
+[2026-02-25 16:51:42.263] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.264] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.266] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.266] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.274] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.274] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.275] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.275] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.599] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.599] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.600] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:42.601] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:51:57.813] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:51:57.814] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:51:57.814] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:51:57.814] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:51:57.815] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:52:03.891] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:52:03.891] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:52:03.891] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:52:03.892] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:52:03.892] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:52:03.892] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Ya hay una transferencia en curso. Intenta en unos segundos.
+[2026-02-25 16:52:07.044] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:52:16.291] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 16:52:16.292] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 16:52:16.295] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 16:52:16.295] INFO    System         : Sistema de logs detenido
+[2026-02-25 16:53:43.952] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:53:43.953] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:53:43.954] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:53:43.954] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:53:43.955] INFO    System         : Sistema de logs iniciado
+[2026-02-25 16:53:43.991] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-25 16:53:43.992] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-25 16:54:13.996] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:54:43.996] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:54:55.370] INFO    NameServer     : Peer conectado: 192.168.102.1:8888
+[2026-02-25 16:54:55.379] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:54:55.718] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 1 archivos
+[2026-02-25 16:54:58.026] INFO    GUI            : ⬇ Descargando 'Algoritmos Criptográficos.jpg' de 192.168.102.1:8888...
+[2026-02-25 16:55:01.282] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:55:01.287] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:55:07.044] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:55:07.046] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:55:13.993] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:55:19.899] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:55:19.901] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:55:21.293] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:55:28.641] INFO    GUI            : ❌ Error descargando: Connect timed out
+[2026-02-25 16:55:41.294] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:55:43.993] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:56:01.296] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:56:13.996] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:56:28.672] INFO    NameServer     : Solicitud de archivo: HojaDesempeño.pdf de 192.168.102.1:8888
+[2026-02-25 16:56:28.674] INFO    NameServer     : Sirviendo HojaDesempeño.pdf en puerto 8889
+[2026-02-25 16:56:43.993] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:56:48.676] INFO    NameServer     : Error sirviendo HojaDesempeño.pdf: Accept timed out
+[2026-02-25 16:57:01.187] INFO    NameServer     : Peer 192.168.102.1:8888 comparte 2 archivos
+[2026-02-25 16:57:07.724] INFO    GUI            : ⬇ Descargando 'Cardex.pdf' de 192.168.102.1:8888...
+[2026-02-25 16:57:13.997] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:57:38.345] INFO    GUI            : ❌ Error descargando: Connect timed out
+[2026-02-25 16:57:44.007] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:58:14.009] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:58:44.008] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:59:14.007] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 16:59:44.012] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 17:00:14.008] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 17:00:44.009] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-25 17:00:53.139] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-25 17:00:53.140] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-25 17:00:53.145] INFO    NameServer     : Peer desconectado: 192.168.102.1:8888
+[2026-02-25 17:00:53.145] INFO    System         : Sistema de logs detenido
+[2026-02-26 08:25:31.484] INFO    System         : Sistema de logs iniciado
+[2026-02-26 08:25:31.523] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 08:25:31.523] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 08:26:01.528] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:26:31.527] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:27:01.527] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:27:31.525] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:27:56.541] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 08:27:56.543] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 08:28:04.603] INFO    System         : Sistema de logs iniciado
+[2026-02-26 08:28:04.641] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 08:28:04.642] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 08:28:34.647] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:29:04.645] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:29:34.645] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:30:04.640] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:30:34.643] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:31:04.638] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:31:34.694] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:31:59.036] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 08:31:59.038] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 08:32:42.983] INFO    System         : Sistema de logs iniciado
+[2026-02-26 08:32:43.017] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 08:32:43.017] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 08:33:02.280] INFO    NameServer     : Peer conectado: 192.168.100.14:8888
+[2026-02-26 08:33:02.283] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 08:33:02.344] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 08:33:13.018] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:33:43.021] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:33:48.840] INFO    GUI            : 📤 Compartido: IMG_6749.jpg
+[2026-02-26 08:34:13.020] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:34:19.039] INFO    GUI            : 📤 Compartido: TLS.png
+[2026-02-26 08:34:43.020] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:35:13.019] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 08:35:43.019] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:55:01.674] INFO    System         : Sistema de logs iniciado
+[2026-02-26 09:55:01.720] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-26 09:55:01.720] INFO    NameServer     : Iniciado en nodo: 192.168.100.10:8888
+[2026-02-26 09:55:01.720] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 09:55:01.721] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 09:55:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:56:01.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:56:31.726] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:57:01.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:57:31.726] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:57:55.514] INFO    GUI            : 📤 Compartido: 📄 [Local] HojaDesempeño.pdf
+[2026-02-26 09:58:01.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:58:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:59:01.724] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 09:59:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:00:01.720] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:00:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:00:45.403] INFO    GUI            : Conectando a: 192.168.100.14...
+[2026-02-26 10:00:45.515] INFO    NameServer     : Peer conectado: 192.168.100.14:8888
+[2026-02-26 10:00:45.518] INFO    GUI            : Conexión procesada: 192.168.100.14
+[2026-02-26 10:00:45.585] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 10:00:45.604] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 10:00:55.994] INFO    NameServer     : Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:00:55.995] INFO    ConsensusManager: Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:01:01.721] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:01:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:02:01.724] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:02:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:03:01.724] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:03:31.725] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:04:01.724] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:04:31.724] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:05:07.682] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:05:37.695] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:06:07.695] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:06:37.696] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:07:07.694] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:07:37.696] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:08:07.692] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:08:37.697] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:08:54.154] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 10:08:54.155] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 10:09:07.028] INFO    System         : Sistema de logs iniciado
+[2026-02-26 10:09:07.067] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-26 10:09:07.067] INFO    NameServer     : Iniciado en nodo: 192.168.100.10:8888
+[2026-02-26 10:09:07.067] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 10:09:07.068] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 10:09:37.069] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:10:07.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:10:37.072] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:11:07.072] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:11:17.895] INFO    NameServer     : Peer conectado: 192.168.100.14:8888
+[2026-02-26 10:11:17.904] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 10:11:17.937] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 7 archivos
+[2026-02-26 10:11:37.070] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:12:07.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:12:16.004] INFO    GUI            : 📤 Compartido: prueba.txt
+[2026-02-26 10:12:37.074] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:12:37.075] INFO    Synchronizer   : Cambio detectado en archivo: prueba.txt
+[2026-02-26 10:12:37.077] INFO    Synchronizer   : Cambio propagado para: prueba.txt
+[2026-02-26 10:12:48.291] INFO    GUI            : 📡 Solicitando logs a 1 peers...
+[2026-02-26 10:12:48.367] INFO    GUI            : 📡 Logs recibidos de: 192.168.100.14:8888 (14 entradas)
+[2026-02-26 10:13:07.070] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:13:37.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:13:43.408] INFO    NameServer     : Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:13:43.409] INFO    NameServer     : Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:13:43.410] INFO    ConsensusManager: Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:13:43.410] INFO    ConsensusManager: Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:14:07.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:14:22.631] INFO    NameServer     : Peer conectado: 192.168.100.14:8888
+[2026-02-26 10:14:22.633] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 8 archivos
+[2026-02-26 10:14:22.695] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 8 archivos
+[2026-02-26 10:14:37.074] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:15:07.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:15:17.574] INFO    GUI            : 📤 Compartido: trash.svg
+[2026-02-26 10:15:37.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:16:07.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:16:30.247] INFO    NameServer     : Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:16:30.249] INFO    ConsensusManager: Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:16:37.073] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:16:57.987] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 10:16:57.988] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 10:17:00.331] INFO    System         : Sistema de logs iniciado
+[2026-02-26 10:17:00.372] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-26 10:17:00.372] INFO    NameServer     : Iniciado en nodo: 192.168.100.10:8888
+[2026-02-26 10:17:00.372] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 10:17:00.373] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 10:17:30.374] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:18:00.373] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:18:30.374] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:19:00.378] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:19:30.377] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:19:41.157] INFO    NameServer     : Peer conectado: 192.168.100.14:8888
+[2026-02-26 10:19:41.164] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 0 archivos
+[2026-02-26 10:19:41.182] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 0 archivos
+[2026-02-26 10:19:59.464] INFO    NameServer     : Peer 192.168.100.14:8888 comparte 1 archivos
+[2026-02-26 10:20:00.376] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:20:23.380] INFO    GUI            : 📤 Compartido: prueba.txt
+[2026-02-26 10:20:30.380] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:21:00.384] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:21:30.385] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:22:00.386] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:22:30.385] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:23:00.385] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:23:30.382] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:24:00.382] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:24:30.387] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:25:00.386] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:25:30.383] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:26:00.383] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:26:30.390] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:26:30.392] INFO    Synchronizer   : Cambio detectado en archivo: prueba.txt
+[2026-02-26 10:26:30.396] INFO    Synchronizer   : Cambio propagado para: prueba.txt
+[2026-02-26 10:27:00.392] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:27:30.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:28:00.384] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:28:30.387] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:29:00.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:29:30.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:30:00.386] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:30:30.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:31:00.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:31:30.389] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:32:00.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:32:01.285] INFO    GUI            : 📡 Solicitando logs a 1 peers...
+[2026-02-26 10:32:01.375] INFO    GUI            : 📡 Logs recibidos de: 192.168.100.14:8888 (44 entradas)
+[2026-02-26 10:32:30.385] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:33:00.386] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:33:30.385] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:34:00.389] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:34:30.390] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:34:50.137] INFO    NameServer     : Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:34:50.138] INFO    ConsensusManager: Peer desconectado: 192.168.100.14:8888
+[2026-02-26 10:35:00.389] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:35:30.390] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:36:00.390] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:36:30.389] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:37:00.388] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:37:30.386] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:37:36.165] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 10:37:36.166] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 10:49:14.632] INFO    System         : Sistema de logs iniciado
+[2026-02-26 10:49:14.674] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-26 10:49:14.675] INFO    NameServer     : Iniciado en nodo: 192.168.100.10:8888
+[2026-02-26 10:49:14.675] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 10:49:14.675] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 10:49:17.232] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 10:49:17.233] INFO    Synchronizer   : Sincronizador detenido
