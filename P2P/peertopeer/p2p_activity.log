@@ -770,3 +770,89 @@
 [2026-02-26 10:49:14.675] INFO    Synchronizer   : Sincronizador iniciado
 [2026-02-26 10:49:17.232] INFO    TTLMonitor     : Monitor TTL detenido
 [2026-02-26 10:49:17.233] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-26 10:55:45.677] INFO    System         : Sistema de logs iniciado
+[2026-02-26 10:55:45.724] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-26 10:55:45.725] INFO    NameServer     : Iniciado en nodo: 192.168.100.10:8888
+[2026-02-26 10:55:45.725] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-26 10:55:45.725] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-26 10:56:15.727] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:56:45.730] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:57:07.927] INFO    GUI            : 📤 Compartido: prueba.txt
+[2026-02-26 10:57:15.731] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:57:45.727] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-26 10:57:45.729] INFO    Synchronizer   : Cambio detectado en archivo: prueba.txt
+[2026-02-26 10:57:45.729] INFO    Synchronizer   : Cambio propagado para: prueba.txt
+[2026-02-26 10:58:00.869] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-26 10:58:00.869] INFO    Synchronizer   : Sincronizador detenido
+[2026-02-27 13:04:47.396] INFO    System         : Sistema de logs iniciado
+[2026-02-27 13:04:47.445] INFO    RequestManager : Gestor de peticiones iniciado
+[2026-02-27 13:04:47.446] INFO    NameServer     : Iniciado en nodo: 172.26.160.230:8888
+[2026-02-27 13:04:47.446] INFO    TTLMonitor     : Monitor TTL iniciado
+[2026-02-27 13:04:47.446] INFO    Synchronizer   : Sincronizador iniciado
+[2026-02-27 13:05:17.451] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:05:47.451] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:06:17.451] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:06:47.450] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:07:17.451] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:07:54.147] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:08:24.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:08:54.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:09:24.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:09:54.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:10:24.141] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:10:54.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:11:24.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:11:39.710] INFO    NameServer     : Peer conectado: 192.168.220.1:8888
+[2026-02-27 13:11:39.718] INFO    NameServer     : Peer 192.168.220.1:8888 comparte 8 archivos
+[2026-02-27 13:11:40.011] INFO    NameServer     : Peer 192.168.220.1:8888 comparte 8 archivos
+[2026-02-27 13:11:54.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:12:24.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:12:54.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:13:24.145] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:13:54.141] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:14:07.266] INFO    NameServer     : Archivo devuelto: prueba.txt por 192.168.220.1:8888 (sin cambios)
+[2026-02-27 13:14:24.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:14:24.147] INFO    Synchronizer   : Cambio detectado en archivo: prueba.txt
+[2026-02-27 13:14:24.150] INFO    Synchronizer   : Cambio propagado para: prueba.txt
+[2026-02-27 13:14:54.140] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:15:00.105] INFO    GUI            : 📤 Compartido: 📄 [Local] HojaDesempeño.pdf
+[2026-02-27 13:15:24.141] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:15:54.140] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:16:24.139] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:16:41.482] INFO    GUI            : 📤 Compartido: CV_HectorUrielAvilaCortes.pdf
+[2026-02-27 13:16:54.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:17:24.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:17:41.210] INFO    GUI            : 📡 Solicitando logs a 1 peers...
+[2026-02-27 13:17:41.652] INFO    GUI            : 📡 Logs recibidos de: 192.168.220.1:8888 (32 entradas)
+[2026-02-27 13:17:54.143] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:18:09.583] INFO    NameServer     : Peer desconectado: 192.168.220.1:8888
+[2026-02-27 13:18:09.585] INFO    ConsensusManager: Peer desconectado: 192.168.220.1:8888
+[2026-02-27 13:18:24.144] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:18:54.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:19:24.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:19:54.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:20:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:20:54.208] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:21:24.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:21:54.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:22:24.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:22:54.209] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:23:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:23:54.206] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:24:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:24:54.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:25:24.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:25:54.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:26:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:26:54.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:27:24.212] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:27:54.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:28:24.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:28:54.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:29:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:29:54.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:30:24.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:30:54.211] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:31:24.210] INFO    Synchronizer   : Iniciando sincronización completa
+[2026-02-27 13:31:31.834] INFO    TTLMonitor     : Monitor TTL detenido
+[2026-02-27 13:31:31.834] INFO    Synchronizer   : Sincronizador detenido

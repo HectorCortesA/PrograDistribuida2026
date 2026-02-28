@@ -11,21 +11,21 @@ import java.util.concurrent.TimeUnit;
 
 public class TTLMonitor {
 
-    private final LocalCache        localCache;
-    private final MetadataStore     metadataStore;
-    private final ThreadManager     threadManager;
-    private final ConsensusManager  consensusManager; // ← para iniciar votación al expirar
-    private final LogRegistry       logRegistry;
+    private final LocalCache localCache;
+    private final MetadataStore metadataStore;
+    private final ThreadManager threadManager;
+    private final ConsensusManager consensusManager; // ← para iniciar votación al expirar
+    private final LogRegistry logRegistry;
     private boolean running;
 
     public TTLMonitor(LocalCache localCache, MetadataStore metadataStore,
-                      ThreadManager threadManager, ConsensusManager consensusManager) {
-        this.localCache       = localCache;
-        this.metadataStore    = metadataStore;
-        this.threadManager    = threadManager;
+            ThreadManager threadManager, ConsensusManager consensusManager) {
+        this.localCache = localCache;
+        this.metadataStore = metadataStore;
+        this.threadManager = threadManager;
         this.consensusManager = consensusManager;
-        this.logRegistry      = new LogRegistry();
-        this.running          = true;
+        this.logRegistry = new LogRegistry();
+        this.running = true;
     }
 
     public void start() {
@@ -53,14 +53,14 @@ public class TTLMonitor {
 
         for (FileMetadata metadata : metadataStore.getAllMetadata()) {
             // ── TTL = 0 (FOREVER): NUNCA expirar ni actualizar ──
-            if (metadata.isForever()) continue;
+            if (metadata.isForever())
+                continue;
 
             if (metadata.isExpired()) {
                 handleExpiredFile(metadata);
                 expiredCount++;
             }
         }
-
         if (expiredCount > 0)
             logRegistry.info("TTLMonitor", "Procesados " + expiredCount + " metadatos expirados");
     }
@@ -68,8 +68,8 @@ public class TTLMonitor {
     /**
      * Al detectar un archivo expirado:
      * 1. Inicia consenso distribuido para verificar si algún peer lo tiene.
-     *    - Si ninguno lo tiene → se borra (lo ejecuta ConsensusManager).
-     *    - Si alguno lo tiene → se actualiza el dueño (lo maneja ConsensusManager).
+     * - Si ninguno lo tiene → se borra (lo ejecuta ConsensusManager).
+     * - Si alguno lo tiene → se actualiza el dueño (lo maneja ConsensusManager).
      * 2. Elimina la entrada de caché local mientras se resuelve.
      */
     private void handleExpiredFile(FileMetadata metadata) {
