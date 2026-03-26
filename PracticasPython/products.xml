@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<products>
+  <product>
+    <id>P009</id>
+    <name>Silla Ergonómica</name>
+    <price>4200.0</price>
+  </product>
+  <product>
+    <id>P001</id>
+    <name>Laptop Ultrabook</name>
+    <price>15999.99</price>
+  </product>
+  <product>
+    <id>P004</id>
+    <name>Monitor 27" 4K</name>
+    <price>6500.0</price>
+  </product>
+  <product>
+    <id>P008</id>
+    <name>SSD NVMe 1 TB</name>
+    <price>1800.0</price>
+  </product>
+  <product>
+    <id>P002</id>
+    <name>Mouse Inalámbrico</name>
+    <price>299.5</price>
+  </product>
+  <product>
+    <id>P007</id>
+    <name>USB Hub 7 puertos</name>
+    <price>450.0</price>
+  </product>
+  <product>
+    <id>P098</id>
+    <name>Artículo Inexistente</name>
+    <price>0.0</price>
+  </product>
+</products>
