@@ -16,4 +16,4 @@ def run_client():
 
             print(f"error al llamar al servidor: {e.status()}- {e.details()}")
             if __name__ == '__main__' :
-                run_client
+                run_clientx
