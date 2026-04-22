@@ -6,23 +6,23 @@ import java.util.Random;
 
 /**
  * =========================================================
- *  PRODUCTOR - Nivel 1 de la Arquitectura de 3 Niveles
+ * PRODUCTOR - Nivel 1 de la Arquitectura de 3 Niveles
  * =========================================================
  * Simula una MÁQUINA PRODUCTORA independiente.
  *
  * En la consola se muestra paso a paso:
- *   1. El vector de 3 números que genera
- *   2. La llamada RPC que hace al Storage
- *   3. La respuesta que recibe del Storage
+ * 1. El vector de 3 números que genera
+ * 2. La llamada RPC que hace al Storage
+ * 3. La respuesta que recibe del Storage
  *
  * En un sistema real con 3 máquinas, este proceso correría
  * en una computadora distinta y se comunicaría con el Storage
  * por red (sockets / gRPC). Aquí se simula con hilos.
  *
  * Salida de consola esperada:
- *  [MÁQUINA-PRODUCTORA-1] ▶ Vector generado    : [312, 87, 654]
- *  [MÁQUINA-PRODUCTORA-1]   Llamada RPC        : pushVector([312, 87, 654])
- *  [MÁQUINA-PRODUCTORA-1]   Respuesta Storage  : ✓ ACEPTADO
+ * [MÁQUINA-PRODUCTORA-1] ▶ Vector generado : [312, 87, 654]
+ * [MÁQUINA-PRODUCTORA-1] Llamada RPC : pushVector([312, 87, 654])
+ * [MÁQUINA-PRODUCTORA-1] Respuesta Storage : ✓ ACEPTADO
  */
 public class Producer implements Runnable {
 
@@ -51,10 +51,10 @@ public class Producer implements Runnable {
      * @param producerId  identificador de esta máquina
      */
     public Producer(StorageRPC storageStub, int producerId) {
-        this.storageStub    = storageStub;
-        this.producerId     = producerId;
-        this.name           = "MÁQUINA-PRODUCTORA-" + producerId;
-        this.random         = new Random();
+        this.storageStub = storageStub;
+        this.producerId = producerId;
+        this.name = "MÁQUINA-PRODUCTORA-" + producerId;
+        this.random = new Random();
         this.vectorsAccepted = 0;
         this.vectorsRejected = 0;
     }
@@ -63,10 +63,10 @@ public class Producer implements Runnable {
      * Ciclo principal del Productor.
      *
      * Cada iteración:
-     *  1. Genera un vector de 3 números distintos en [1, 1000].
-     *  2. Muestra el vector en consola.
-     *  3. Llama pushVector() en el Storage (RPC).
-     *  4. Muestra la respuesta recibida del Storage.
+     * 1. Genera un vector de 3 números distintos en [1, 1000].
+     * 2. Muestra el vector en consola.
+     * 3. Llama pushVector() en el Storage (RPC).
+     * 4. Muestra la respuesta recibida del Storage.
      */
     @Override
     public void run() {
@@ -104,14 +104,14 @@ public class Producer implements Runnable {
 
         // ── Mensaje de cierre ──────────────────────────────────────
         System.out.println("┌─────────────────────────────────────────────────────");
-        System.out.printf( "│ [%s] DETENIDA%n", name);
-        System.out.printf( "│   Vectores aceptados : %,d%n", vectorsAccepted);
-        System.out.printf( "│   Vectores rechazados: %,d (duplicados)%n", vectorsRejected);
+        System.out.printf("│ [%s] DETENIDA%n", name);
+        System.out.printf("│   Vectores aceptados : %,d%n", vectorsAccepted);
+        System.out.printf("│   Vectores rechazados: %,d (duplicados)%n", vectorsRejected);
         System.out.println("└─────────────────────────────────────────────────────");
     }
 
     // =========================================================
-    //  MÉTODO PRIVADO: generación del vector
+    // MÉTODO PRIVADO: generación del vector
     // =========================================================
 
     /**
@@ -138,6 +138,11 @@ public class Producer implements Runnable {
     }
 
     // Getters de estadísticas
-    public long getVectorsAccepted() { return vectorsAccepted; }
-    public long getVectorsRejected() { return vectorsRejected; }
+    public long getVectorsAccepted() {
+        return vectorsAccepted;
+    }
+
+    public long getVectorsRejected() {
+        return vectorsRejected;
+    }
 }
