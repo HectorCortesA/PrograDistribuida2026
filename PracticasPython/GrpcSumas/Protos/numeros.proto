@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package numeros;
+
+service NumeroService {
+  // Cliente pide un vector (3 números)
+  rpc ObtenerVector(ClienteInfo) returns (Vector);
+
+  // Cliente envía el resultado de su cálculo
+  rpc EnviarResultado(Resultado) returns (RespuestaServidor);
+}
+
+message ClienteInfo {
+  string id = 1; // nombre o id del cliente
+}
+
+message Vector {
+  repeated int32 numeros = 1; // tres números aleatorios
+}
+
+message Resultado {
+  string id = 1;       // id del cliente
+  int32 resultado = 2; // suma o función calculada
+}
+
+message RespuestaServidor {
+  string mensaje = 1;
+  int32 total_resultados = 2;
+}

@@ -1,0 +1,13 @@
+services:
+  python-consumer:
+    build: .
+    container_name: python-consumer-node
+    restart: on-failure
+    environment:
+      - PYTHONUNBUFFERED=1 # <-- ESTA ES LA LÍNEA MÁGICA
+    networks:
+      - rabbit_red
+
+networks:
+  rabbit_red:
+    external: true
