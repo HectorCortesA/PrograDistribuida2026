@@ -1,0 +1,20 @@
+import pika, json, sys
+
+def callback(ch, method, props, body):
+    data = json.loads(body)
+    if data['num2'] == 0:
+        res = {"error": "División por cero"}
+    else:
+        res = {"data": data['num1'] / data['num2']}
+    
+    ch.basic_publish(exchange='', routing_key=props.reply_to,
+                     properties=pika.BasicProperties(correlation_id=props.correlation_id),
+                     body=json.dumps(res))
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+ip = sys.argv[1] if len(sys.argv) > 1 else 'localhost'
+conn = pika.BlockingConnection(pika.ConnectionParameters(host=ip))
+channel = conn.channel()
+channel.queue_declare(queue='division')
+channel.basic_consume(queue='division', on_message_callback=callback)
+channel.start_consuming()

@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # Puerto de datos
+      - "15672:15672" # Interfaz web (usuario: guest, pass: guest)
+
+  orquestador:
+    build: .
+    command: ["orquestador.py", "rabbitmq"]
+    depends_on:
+      - rabbitmq
+    ports:
+      - "50051:50051"
+
+  servicio_suma:
+    build: .
+    command: ["suma.py", "rabbitmq"]
+    depends_on:
+      - rabbitmq
+
+  servicio_resta:
+    build: .
+    command: ["resta.py", "rabbitmq"]
+    depends_on:
+      - rabbitmq
+
+  servicio_mult:
+    build: .
+    command: ["multiplicacion.py", "rabbitmq"]
+    depends_on:
+      - rabbitmq
+
+  servicio_div:
+    build: .
+    command: ["division.py", "rabbitmq"]
+    depends_on:
+      - rabbitmq
